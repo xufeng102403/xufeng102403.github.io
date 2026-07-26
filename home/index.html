@@ -168,6 +168,31 @@
     </div>
 
     
+    <div class="sidebar-custom-widget" style="background: #fff; padding: 15px; margin-top: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: center;">
+      <img src="/images/worm3.gif" alt="自定义动图" style="max-width: 100%; height: auto; display: block; margin: 0 auto;">
+      <p id="side-runtime" style="margin-top: 8px; font-size: 0.8em; color: #888;"></p>
+      
+      <script>
+          // 计算站点运行时间
+          function showRuntime() {
+              const startDate = new Date("2026-07-21T17:18:00"); // 修改为你的实际建站日期
+              const now = new Date();
+              const diff = now - startDate;
+              
+              const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+              //const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+              //const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+              //const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+              
+              document.getElementById('side-runtime').innerText = 
+                  `Oh my god, so funny! I've been here for ${days} days. Your arrival really surprised me.`;
+          }
+          setInterval(showRuntime, 1000*60*30); // 每秒刷新
+          showRuntime();
+      </script>
+    </div>
+
+    
   </aside>
 
 
