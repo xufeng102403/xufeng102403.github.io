@@ -182,7 +182,7 @@
               //const seconds = Math.floor((diff % (1000 * 60)) / 1000);
               
               document.getElementById('side-runtime').innerText = 
-                  `Oh my god, so funny! I've been here for ${days} days. Your arrival really surprised me.`;
+                  `Nice to meet you! I've been here for ${days} days.`;
           }
           setInterval(showRuntime, 1000*60*30); // 每秒刷新
           showRuntime();
@@ -198,7 +198,144 @@
     <div class="main-inner post posts-expand">
 
 
+  <style>
+  /* 页面所有图片默认样式 */
+  img {
+    cursor: zoom-in;
+    transition: transform 0.2s ease;
+  }
   
+  img:hover {
+    transform: scale(1.02);
+  }
+  
+  /* 排除灯箱内部的图片，避免递归 */
+  .lightbox-overlay img {
+    cursor: zoom-out;
+    transform: none;
+  }
+  
+  .lightbox-overlay img:hover {
+    transform: none;
+  }
+  
+  /* 灯箱覆盖层 */
+  .lightbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.92);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  
+  .lightbox-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .lightbox-overlay img {
+    max-width: 100vw;
+    max-height: 100vh;
+    object-fit: contain;
+    transform: scale(0.8);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .lightbox-overlay.active img {
+    transform: scale(1);
+  }
+</style>
+
+<script>
+(function() {
+  // 等 DOM 加载完再绑定事件
+  function init() {
+    var overlay = document.getElementById('lightbox');
+    var lightboxImg = document.getElementById('lightbox-img');
+    
+    if (!overlay || !lightboxImg) {
+      console.error('灯箱元素没找到，请检查 HTML');
+      return;
+    }
+    
+    // 标记灯箱是否打开
+    var isOpen = false;
+    
+    function openLightbox(src, alt) {
+      lightboxImg.src = src;
+      lightboxImg.alt = alt || '';
+      overlay.classList.add('active');
+      isOpen = true;
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeLightbox() {
+      overlay.classList.remove('active');
+      isOpen = false;
+      document.body.style.overflow = '';
+      // 延迟清空 src，避免关闭动画时图片闪烁
+      setTimeout(function() {
+        if (!isOpen) {
+          lightboxImg.src = '';
+        }
+      }, 300);
+    }
+    
+    // 全局点击监听
+    document.addEventListener('click', function(e) {
+      var img = e.target;
+      
+      // 1. 如果点在灯箱内，关闭
+      if (overlay.contains(img)) {
+        // 点在灯箱背景空白处或图片上，都关闭
+        closeLightbox();
+        return;
+      }
+      
+      // 2. 只有点到 <img> 才处理
+      if (img.tagName !== 'IMG') return;
+      
+      // 3. 排除灯箱内的图（虽已提前处理，但加个保险）
+      if (img === lightboxImg) return;
+      
+      // 4. 排除有 data-no-zoom 的图
+      if (img.hasAttribute('data-no-zoom')) return;
+      
+      // 5. 图片在 a 标签内，跳过
+      if (img.closest('a')) return;
+      
+      // 6. 打开灯箱
+      e.preventDefault();
+      openLightbox(img.src, img.alt);
+    });
+    
+    // Esc 键关闭
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && isOpen) {
+        closeLightbox();
+      }
+    });
+  }
+  
+  // DOM 加载完成后初始化
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+
 
 
 <div class="post-block">
