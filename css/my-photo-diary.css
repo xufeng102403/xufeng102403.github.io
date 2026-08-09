@@ -1,0 +1,122 @@
+/* 全局重置 & 极简风格 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #f2f4f8;  /* 柔和背景 */
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    padding: 2rem 1.5rem;
+}
+
+/* 主卡片 —— 干净的白底 + 柔和阴影，容纳两张相框 */
+.frame-card {
+    max-width: 90%;
+    width: 100%;
+    background: #ffffff;
+    border-radius: 2.2rem;
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1), 0 8px 24px -6px rgba(0, 0, 0, 0.05);
+    padding: 1.75rem 1.75rem 2rem 1.75rem;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+/* 竖直排列容器 —— 使用 flex 列，间距舒适 */
+.photo-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem;          /* 两张图片之间的间距 */
+    align-items: center;
+}
+
+/* 每个相框容器 —— 模拟 “相框的感觉” */
+.photo-frame {
+    position: relative;
+    background: #ffffff;
+    padding: 0.7rem;              /* 内边距形成白边（相框） */
+    border-radius: 1.5rem;        /* 圆润相框边角 */
+    box-shadow: 
+        inset 0 0 0 1px rgba(0, 0, 0, 0.04),   /* 极细内线，增加层次 */
+        0 8px 20px -8px rgba(0, 0, 0, 0.12);    /* 轻微外阴影，让相框立体 */
+    transition: box-shadow 0.2s;
+    width: 100%;                  /* 相框宽度撑满卡片 */
+}
+
+/* 图片本身 —— 填满相框，圆角与相框呼应 */
+.photo-frame img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;           /* 1:1 方形图片，更显精致 */
+    object-fit: cover;             /* 保证图片填充均匀 */
+    border-radius: 1rem;           /* 内圆角，与相框外圆角形成层次 */
+    background: #e9edf2;           /* 图片加载前占位色 */
+}
+
+/* 每张图片下方的文字描述（只针对单张描述） */
+.frame-caption {
+    margin-top: 0.9rem;
+    padding: 0 0.2rem;
+    text-align: center;
+}
+
+.frame-caption p {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #1e293b;
+    letter-spacing: 0.01em;
+    font-weight: 400;
+}
+
+.frame-caption .sub {
+    font-size: 0.85rem;
+    color: #64748b;
+    letter-spacing: 0.02em;
+    font-weight: 350;
+}
+
+/* 装饰分隔线 (可用于单张描述内) */
+.desc-divider {
+    width: 2rem;
+    height: 2px;
+    background: #dce1e9;
+    margin: 0.3rem auto 0.5rem auto;
+    border-radius: 4px;
+}
+
+/* 整体卡片底部可能留白，但由 photo-stack gap 控制，不额外添加 */
+
+/* 移动端优化 */
+@media (max-width: 480px) {
+    .frame-card {
+        padding: 1.25rem 1.25rem 1.5rem 1.25rem;
+    }
+    .photo-frame {
+        padding: 0.5rem;
+        border-radius: 1.2rem;
+    }
+    .photo-frame img {
+        border-radius: 0.8rem;
+    }
+    .photo-stack {
+        gap: 1.5rem;
+    }
+    .frame-caption p {
+        font-size: 0.95rem;
+    }
+}
+
+/* 悬停相框微浮效果 (可选) */
+.photo-frame:hover {
+    box-shadow: 
+        inset 0 0 0 1px rgba(0, 0, 0, 0.02),
+        0 12px 28px -10px rgba(0, 0, 0, 0.18);
+}
+
+/* 整体卡片悬停不必再单独处理，因为相框本身已有 hover */
