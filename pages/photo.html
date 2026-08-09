@@ -107,10 +107,10 @@
             }
             .photo-frame {
                 padding: 0.5rem;
-                border-radius: 1.2rem;
+                /*border-radius: 1.2rem;*/
             }
             .photo-frame img {
-                border-radius: 0.8rem;
+                border-radius: 0rem;
             }
             .photo-stack {
                 gap: 1.5rem;
@@ -136,7 +136,6 @@
         <!-- 竖直排列的两张图片 (相框风格) -->
         <div class="photo-stack">
 
-            <!-- 第一张图片 + 描述 -->
             <div class="photo-frame">
                 <img 
                     src="/images/scenery/birds_in_the_blue_sky.jpg" 
@@ -145,11 +144,34 @@
                 <div class="frame-caption">
                     <p>大雁南飞</p>
                     <div class="desc-divider"></div>
-                    <p class="sub">河北 · 张家口 · 官厅水库  |  2026.04</p>
+                    <p class="sub">河北 · 张家口 · 怀来大桥  |  2026.04</p>
                 </div>
             </div>
 
-            <!-- 第二张图片 + 描述 -->
+            <div class="photo-frame">
+                <img 
+                    src="/images/scenery/sunset_huailai_couple.jpg" 
+                    loading="lazy"
+                />
+                <div class="frame-caption">
+                    <p>爱在日落黄昏时</p>
+                    <div class="desc-divider"></div>
+                    <p class="sub">河北 · 张家口 · 怀来大桥北侧  |  2026.04</p>
+                </div>
+            </div>
+
+            <div class="photo-frame">
+                <img 
+                    src="/images/scenery/sea_curious_kid.jpg" 
+                    loading="lazy"
+                />
+                <div class="frame-caption">
+                    <p>望向海的那一边</p>
+                    <div class="desc-divider"></div>
+                    <p class="sub">山东 · 日照 · 灯塔  |  2023.10</p>
+                </div>
+            </div>
+
             <div class="photo-frame">
                 <img 
                     src="/images/scenery/sunset_playground.jpg" 
@@ -162,9 +184,9 @@
                 </div>
             </div>
 
-            <!-- 如果你还需要更多图片，可以继续按照相同结构添加 -->
-            <!-- 只需复制上面的 .photo-frame 块，放在 stack 中即可 -->
+            
         </div>
+        
     </div>
 
 </body>
