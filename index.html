@@ -169,12 +169,23 @@
 
     
     <div class="sidebar-custom-widget" style="background: #fff; padding: 15px; margin-top: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: center;">
-      <img src="/images/worm3.gif" alt="自定义动图" style="max-width: 100%; height: auto; display: block; margin: 0 auto;">
+      <img id="side-gif" src="/images/worm3.gif" alt="自定义动图" style="max-width: 100%; height: auto; display: block; margin: 0 auto;">
       <p id="side-runtime" style="margin-top: 8px; font-size: 0.8em; color: #888;"></p>
       
       <script>
           // 计算站点运行时间
           function showRuntime() {
+              const now_1 = new Date();
+              
+              // 1. 根据当前小时奇偶切换GIF
+              const hour = now_1.getHours(); // 0-23
+              const gifElement = document.getElementById('side-gif');
+              if (hour % 2 === 0) {
+                  gifElement.src = '/images/worm3.gif';
+              } else {
+                  gifElement.src = '/images/eeyore.gif';
+              }
+
               const startDate = new Date("2026-07-21T17:18:00"); // 修改为你的实际建站日期
               const now = new Date();
               const diff = now - startDate;
@@ -187,7 +198,7 @@
               document.getElementById('side-runtime').innerText = 
                   `Nice to meet you! I've been here for ${days} days.`;
           }
-          setInterval(showRuntime, 1000*60*30); // 每秒刷新
+          setInterval(showRuntime, 1000*60*10); // 每十分钟刷新
           showRuntime();
       </script>
     </div>
@@ -207,7 +218,14 @@
     
   
     
-      <h1 id="Welcome-to-xu-feng’s-page"><a href="#Welcome-to-xu-feng’s-page" class="headerlink" title="Welcome to xu feng’s page"></a>Welcome to xu feng’s page</h1><p><img src="/images/scenery/beautiful_bridge.jpg"></p>
+      <h1 id="Welcome-to-xu-feng’s-page"><a href="#Welcome-to-xu-feng’s-page" class="headerlink" title="Welcome to xu feng’s page"></a>Welcome to xu feng’s page</h1><h2 id="Done-list"><a href="#Done-list" class="headerlink" title="Done list:"></a>Done list:</h2><p><input type="checkbox" checked> Spent the four years of my university life in Chongqing, and recorded beautiful moments.</p>
+<p><input type="checkbox" checked> Having lived in several cities for a period of time, and experienced the lifestyles of different cities.</p>
+<p><input type="checkbox" checked> Go to a higher platform, meet more outstanding people and broaden my horizons.</p>
+<h2 id="To-do-list"><a href="#To-do-list" class="headerlink" title="To-do list:"></a>To-do list:</h2><p><input type="checkbox" unchecked> Visit England(Crucible Theatre, etc.) and France(Eiffel Tower, etc.).</p>
+<p><input type="checkbox" unchecked> Play snooker for four hours every weekend, and play eightball during the weekdays.</p>
+<p><input type="checkbox" unchecked> Take photos of my beloved one and accompany her through the long years.</p>
+<p><input type="checkbox" unchecked> Earn a lot of money and have the capacity to guard the important people in my life.<br><br></p>
+<p><img src="/images/scenery/school_tree_cloud.jpg"></p>
 
     
   
