@@ -37,16 +37,16 @@
 <meta property="og:image" content="http://example.com/images/quantization/survey_of_quant_method.png">
 <meta property="og:image" content="http://example.com/images/quantization/smoothquant_1.png">
 <meta property="og:image" content="http://example.com/images/quantization/llm.int8()_1.png">
-<meta property="og:image" content="http://example.com/Users/xufeng/note/images/quantization/super_weight.png">
-<meta property="og:image" content="http://example.com/Users/xufeng/note/images/quantization/massive_activations.png">
-<meta property="og:image" content="http://example.com/Users/xufeng/note/images/quantization/massive_activatioins_1.png">
+<meta property="og:image" content="http://example.com/images/quantization/super_weight.png">
+<meta property="og:image" content="http://example.com/images/quantization/massive_activations.png">
+<meta property="og:image" content="http://example.com/images/quantization/massive_activatioins_1.png">
 <meta property="og:image" content="http://example.com/images/quantization/duquant.png">
 <meta property="og:image" content="http://example.com/images/quantization/quantizable_transformers.png">
 <meta property="og:image" content="http://example.com/images/quantization/quantizable_transformers_1.png">
 <meta property="og:image" content="http://example.com/images/quantization/outlier_suppression.png">
 <meta property="og:image" content="http://example.com/images/quantization/outlier_suppression_equation.png">
 <meta property="article:published_time" content="2026-09-07T12:06:54.000Z">
-<meta property="article:modified_time" content="2026-09-07T12:24:56.431Z">
+<meta property="article:modified_time" content="2026-09-07T12:27:49.132Z">
 <meta property="article:author" content="Xu feng">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://example.com/images/quantization/survey_on_efficient_inference.png">
@@ -412,7 +412,7 @@
       <span class="post-meta-item-text">Posted on</span>
       
 
-      <time title="Created: 2026-09-07 20:06:54 / Modified: 20:24:56" itemprop="dateCreated datePublished" datetime="2026-09-07T20:06:54+08:00">2026-09-07</time>
+      <time title="Created: 2026-09-07 20:06:54 / Modified: 20:27:49" itemprop="dateCreated datePublished" datetime="2026-09-07T20:06:54+08:00">2026-09-07</time>
     </span>
 
   
@@ -959,7 +959,7 @@
 <li><strong>对模型预测能力的致命影响</strong> 实验证明，如果粗暴地移除异常值，哪怕只是移除极少数几个特征维度，也会导致模型性能的“雪崩”。<br>一项研究发现，对于一个大型Transformer模型，如果将包含异常值的7个特征维度移除，模型的<strong>Top-1预测概率会直接从约40%腰斩至约20%</strong>，而衡量模型性能的<strong>困惑度（Perplexity）指标会暴增600-1000%</strong>！相比之下，如果随机移除7个不包含异常值的特征维度，模型的性能几乎不受任何影响。</li>
 </ul>
 <p>下面这张图生动地展示了移除一个“超级权重”（一种关键的权重异常值）后的灾难性后果：</p>
-<p><img src="/Users/xufeng/note/images/quantization/super_weight.png" alt="super_weight"></p>
+<p><img src="/images/quantization/super_weight.png" alt="super_weight"></p>
 <blockquote>
 <p>图片来源：论文 The super weight in large language models</p>
 <p>在包含超级权重时，模型能流畅地回答问题；而移除后，模型直接开始“胡言乱语”， 输出毫无意义的乱码</p>
@@ -990,14 +990,14 @@
 <li><strong>极端数值</strong>: 它们的数值大到夸张，论文中给出的一个定量定义是：<strong>幅值超过100，并且至少是其所在隐藏状态中值幅度的1000倍</strong>。</li>
 <li><strong>出现位置</strong>: 它们常常出现在一些结构性的、有特殊功能的Token上，例如<strong>句首的起始Token <code>[BOS]</code>、标点符号（如<code>.</code>、<code>\n</code>）或某些高频功能词（如“and”、“of”）</strong>。</li>
 </ol>
-<p><img src="/Users/xufeng/note/images/quantization/massive_activations.png" alt="massive_activations"></p>
+<p><img src="/images/quantization/massive_activations.png" alt="massive_activations"></p>
 <blockquote>
 <p> 图片来源：论文 Massive Activations in Large Language Models</p>
 </blockquote>
 <p>上图展示了巨大异常值的出现模式。无论输入什么句子，在LLaMA2和Mixtral模型中，巨大的激活尖峰总是稳定地出现在固定的几个特征维度，并且只与序列开头的第一个Token相关</p>
 <p><strong>更深层的作用：充当“偏置项”</strong></p>
 <p>研究表明，这些巨大异常值在模型中扮演着一个非常特殊的角色——<strong>一个固定的、但至关重要的偏置项（Bias）</strong>。它们就像模型内置的“全局参数”，通过在注意力机制中吸引大量关注，来为所有其他Token的计算提供一个恒定的基准或偏移。</p>
-<p><img src="/Users/xufeng/note/images/quantization/massive_activatioins_1.png" alt="massive_activatioins_1"></p>
+<p><img src="/images/quantization/massive_activatioins_1.png" alt="massive_activatioins_1"></p>
 <blockquote>
 <p>图片来源：论文 Massive Activations in Large Language Models</p>
 </blockquote>
