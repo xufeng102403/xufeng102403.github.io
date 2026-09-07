@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <link rel="manifest" href="/manifest.json">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.28.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="模型量化技术1 量化的定义和原理量化是一种通过使用低精度数据类型(如8位整数（int8）而不是通常的32位浮点数（float32）来表示权重和激活从而减少运行推理的计算和内存成本的技术。形象说来，量化是一次对模型有损但高效的瘦身。 减少比特数意味着生成的模型需要更少的内存存储，消耗更少的能量（理论上），并且像矩阵乘法这样的操作可以用整数运算执行得更快。它还允许在嵌入式设备上运行模型，这些设备有时只">
+<meta property="og:type" content="article">
+<meta property="og:title" content="模型量化技术">
+<meta property="og:url" content="http://example.com/2026/09/07/%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96%E6%8A%80%E6%9C%AF/index.html">
+<meta property="og:site_name" content="Xu feng">
+<meta property="og:description" content="模型量化技术1 量化的定义和原理量化是一种通过使用低精度数据类型(如8位整数（int8）而不是通常的32位浮点数（float32）来表示权重和激活从而减少运行推理的计算和内存成本的技术。形象说来，量化是一次对模型有损但高效的瘦身。 减少比特数意味着生成的模型需要更少的内存存储，消耗更少的能量（理论上），并且像矩阵乘法这样的操作可以用整数运算执行得更快。它还允许在嵌入式设备上运行模型，这些设备有时只">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/images/quantization/survey_on_efficient_inference.png">
+<meta property="og:image" content="http://example.com/images/quantization/llm-qbench.png">
+<meta property="og:image" content="http://example.com/images/quantization/fast_and_efficient.jpg">
+<meta property="og:image" content="http://example.com/images/quantization/survey_on_efficient_inference_1.png">
+<meta property="og:image" content="http://example.com/images/quantization/survey_on_efficient_inference_2.png">
+<meta property="og:image" content="http://example.com/images/quantization/smoothquant_1.png">
+<meta property="og:image" content="http://example.com/images/quantization/survey_of_quant_method.png">
+<meta property="og:image" content="http://example.com/images/quantization/smoothquant_1.png">
+<meta property="og:image" content="http://example.com/images/quantization/llm.int8()_1.png">
+<meta property="og:image" content="http://example.com/Users/xufeng/note/images/quantization/super_weight.png">
+<meta property="og:image" content="http://example.com/Users/xufeng/note/images/quantization/massive_activations.png">
+<meta property="og:image" content="http://example.com/Users/xufeng/note/images/quantization/massive_activatioins_1.png">
+<meta property="og:image" content="http://example.com/images/quantization/duquant.png">
+<meta property="og:image" content="http://example.com/images/quantization/quantizable_transformers.png">
+<meta property="og:image" content="http://example.com/images/quantization/quantizable_transformers_1.png">
+<meta property="og:image" content="http://example.com/images/quantization/outlier_suppression.png">
+<meta property="og:image" content="http://example.com/images/quantization/outlier_suppression_equation.png">
+<meta property="article:published_time" content="2026-09-07T12:06:54.000Z">
+<meta property="article:modified_time" content="2026-09-07T12:24:56.431Z">
+<meta property="article:author" content="Xu feng">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/quantization/survey_on_efficient_inference.png">
+
+
+<link rel="canonical" href="http://example.com/2026/09/07/%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96%E6%8A%80%E6%9C%AF/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://example.com/2026/09/07/%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96%E6%8A%80%E6%9C%AF/","path":"2026/09/07/模型量化技术/","title":"模型量化技术"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>模型量化技术 | Xu feng</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Xu feng</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Stay hungry, stay foolish</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Profile
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96%E6%8A%80%E6%9C%AF"><span class="nav-number">1.</span> <span class="nav-text">模型量化技术</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E9%87%8F%E5%8C%96%E7%9A%84%E5%AE%9A%E4%B9%89%E5%92%8C%E5%8E%9F%E7%90%86"><span class="nav-number">1.1.</span> <span class="nav-text">1 量化的定义和原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E9%87%8F%E5%8C%96%E7%9A%84%E5%AF%B9%E8%B1%A1"><span class="nav-number">1.2.</span> <span class="nav-text">2 量化的对象</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E6%9D%83%E9%87%8D%E9%87%8F%E5%8C%96-Weight-Quantization"><span class="nav-number">1.2.1.</span> <span class="nav-text">2.1 权重量化 (Weight Quantization)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E6%BF%80%E6%B4%BB%E5%80%BC%E9%87%8F%E5%8C%96-Activation-Quantization"><span class="nav-number">1.2.2.</span> <span class="nav-text">2.2 激活值量化 (Activation Quantization)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-KV-Cache%E9%87%8F%E5%8C%96"><span class="nav-number">1.2.3.</span> <span class="nav-text">2.3 KV Cache量化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E9%87%8F%E5%8C%96%E4%B8%8E%E6%95%B0%E5%80%BC%E8%A1%A8%E7%A4%BA"><span class="nav-number">1.3.</span> <span class="nav-text">3 量化与数值表示</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-%E6%B5%AE%E7%82%B9%E6%95%B0%E5%AE%B6%E6%97%8F%EF%BC%88FP%EF%BC%89%EF%BC%9A%E7%B2%BE%E5%BA%A6%E4%B8%8E%E8%8C%83%E5%9B%B4%E7%9A%84%E8%89%BA%E6%9C%AF"><span class="nav-number">1.3.1.</span> <span class="nav-text">3.1 浮点数家族（FP）：精度与范围的艺术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-%E6%95%B4%E6%95%B0%E5%AE%B6%E6%97%8F%EF%BC%88INT%EF%BC%89%EF%BC%9A%E9%87%8F%E5%8C%96%E7%9A%84%E7%BB%88%E7%82%B9"><span class="nav-number">1.3.2.</span> <span class="nav-text">3.2 整数家族（INT）：量化的终点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E9%87%8F%E5%8C%96%E4%B8%8E%E5%8F%8D%E9%87%8F%E5%8C%96"><span class="nav-number">1.4.</span> <span class="nav-text">4 量化与反量化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-%E6%A0%B8%E5%BF%83%E6%9E%84%E4%BB%B6%E4%B8%80%EF%BC%9A%E7%BC%A9%E6%94%BE%E5%9B%A0%E5%AD%90-Scale-s-%E6%88%96-%CE%94-%E5%AE%9A%E4%B9%89%E2%80%9C%E6%B1%87%E7%8E%87%E2%80%9D"><span class="nav-number">1.4.1.</span> <span class="nav-text">4.1 核心构件一：缩放因子 (Scale, s 或 Δ) - 定义“汇率”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-%E6%A0%B8%E5%BF%83%E6%9E%84%E4%BB%B6%E4%BA%8C%EF%BC%9A%E9%9B%B6%E7%82%B9-Zero-Point-z-%E6%A0%A1%E5%87%86%E2%80%9C%E5%8E%9F%E7%82%B9%E2%80%9D"><span class="nav-number">1.4.2.</span> <span class="nav-text">4.2 核心构件二：零点 (Zero-Point, z) - 校准“原点”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B%EF%BC%9A%E9%87%8F%E5%8C%96%E4%B8%8E%E5%8F%8D%E9%87%8F%E5%8C%96%E5%85%AC%E5%BC%8F"><span class="nav-number">1.4.3.</span> <span class="nav-text">4.3 完整流程：量化与反量化公式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E4%BB%85%E6%9D%83%E9%87%8D%E9%87%8F%E5%8C%96%E4%B8%8E%E5%85%A8%E9%87%8F%E5%8C%96"><span class="nav-number">1.5.</span> <span class="nav-text">5 仅权重量化与全量化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-%E4%BB%85%E6%9D%83%E9%87%8D%E9%87%8F%E5%8C%96%EF%BC%9A%E4%B8%93%E6%B3%A8%E6%A0%B8%E5%BF%83%EF%BC%8C%E7%AE%80%E5%8D%95%E9%AB%98%E6%95%88"><span class="nav-number">1.5.1.</span> <span class="nav-text">5.1 仅权重量化：专注核心，简单高效</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#5-1-1-%E6%A0%B8%E5%BF%83%E5%AE%9A%E4%B9%89%E4%B8%8E%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">1.5.1.1.</span> <span class="nav-text">5.1.1 核心定义与工作流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-1-2-%E4%BC%98%E7%82%B9%EF%BC%9A%E4%B8%BA%E4%BD%95%E5%AE%83%E5%A6%82%E6%AD%A4%E5%8F%97%E6%AC%A2%E8%BF%8E%EF%BC%9F"><span class="nav-number">1.5.1.2.</span> <span class="nav-text">5.1.2 优点：为何它如此受欢迎？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-1-3-%E6%80%A7%E8%83%BD%E6%8F%90%E5%8D%87%E7%9A%84%E7%9C%9F%E7%9B%B8%EF%BC%9A%E5%B9%B6%E9%9D%9E%E7%AE%97%E5%BE%97%E6%9B%B4%E5%BF%AB%EF%BC%8C%E8%80%8C%E6%98%AF%E7%AD%89%E5%BE%97%E6%9B%B4%E7%9F%AD"><span class="nav-number">1.5.1.3.</span> <span class="nav-text">5.1.3 性能提升的真相：并非算得更快，而是等得更短</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-1-4-%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF%E4%B8%8E%E5%B1%80%E9%99%90"><span class="nav-number">1.5.1.4.</span> <span class="nav-text">5.1.4 适用场景与局限</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-%E5%85%A8%E9%87%8F%E5%8C%96%EF%BC%9A%E7%AB%AF%E5%88%B0%E7%AB%AF%E5%8A%A0%E9%80%9F%EF%BC%8C%E9%87%8A%E6%94%BE%E7%A1%AC%E4%BB%B6%E5%85%A8%E9%83%A8%E6%BD%9C%E5%8A%9B"><span class="nav-number">1.5.2.</span> <span class="nav-text">5.2 全量化：端到端加速，释放硬件全部潜力</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#5-2-1-%E6%A0%B8%E5%BF%83%E5%AE%9A%E4%B9%89%E4%B8%8E%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">1.5.2.1.</span> <span class="nav-text">5.2.1 核心定义与工作流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-2-2-%E4%BC%98%E7%82%B9%EF%BC%9A%E4%B8%BA%E4%BD%95%E8%A6%81%E8%BF%BD%E6%B1%82%E5%85%A8%E9%87%8F%E5%8C%96%EF%BC%9F"><span class="nav-number">1.5.2.2.</span> <span class="nav-text">5.2.2 优点：为何要追求全量化？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-2-3-%E6%8C%91%E6%88%98%EF%BC%9A%E5%8A%9B%E9%87%8F%E7%9A%84%E4%BB%A3%E4%BB%B7"><span class="nav-number">1.5.2.3.</span> <span class="nav-text">5.2.3 挑战：力量的代价</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-%E4%B8%BA%E4%BD%95%E9%9C%80%E8%A6%81%E6%A0%A1%E5%87%86%E6%95%B0%E6%8D%AE%E9%9B%86%EF%BC%9F%E2%80%94%E2%80%94-%E6%BF%80%E6%B4%BB%E5%80%BC%E9%87%8F%E5%8C%96%E7%9A%84%E2%80%9C%E5%BC%95%E8%B7%AF%E4%BA%BA%E2%80%9D"><span class="nav-number">1.5.3.</span> <span class="nav-text">5.3 为何需要校准数据集？—— 激活值量化的“引路人”</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#5-3-1-%E6%A0%A1%E5%87%86%E9%9B%86%E7%9A%84%E8%A7%92%E8%89%B2%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%80%BC%E5%88%86%E5%B8%83%E7%9A%84%E2%80%9C%E6%98%9F%E6%8E%A2%E2%80%9D"><span class="nav-number">1.5.3.1.</span> <span class="nav-text">5.3.1 校准集的角色：激活值分布的“星探”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-3-2-%E6%A0%A1%E5%87%86%E6%B5%81%E7%A8%8B%EF%BC%9A%E2%80%9C%E9%87%8F%E5%8C%96%E2%80%9D%E5%89%8D%E7%9A%84%E5%BD%A9%E6%8E%92"><span class="nav-number">1.5.3.2.</span> <span class="nav-text">5.3.2 校准流程：“量化”前的彩排</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-3-3-%E6%A0%A1%E5%87%86%E7%AE%97%E6%B3%95%EF%BC%9A%E4%BB%8E%E2%80%9C%E7%AE%80%E5%8D%95%E7%B2%97%E6%9A%B4%E2%80%9D%E5%88%B0%E2%80%9C%E6%99%BA%E8%83%BD%E8%A3%81%E5%89%AA%E2%80%9D"><span class="nav-number">1.5.3.3.</span> <span class="nav-text">5.3.3 校准算法：从“简单粗暴”到“智能裁剪”</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E9%87%8F%E5%8C%96%E7%9A%84%E7%AD%96%E7%95%A5%E4%BB%8E%E5%AE%8F%E8%A7%82%E5%88%B0%E5%BE%AE%E8%A7%82%E7%9A%84%E9%80%89%E6%8B%A9"><span class="nav-number">1.6.</span> <span class="nav-text">6 量化的策略从宏观到微观的选择</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-%E5%AE%8F%E8%A7%82%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B%EF%BC%9A%E8%AE%AD%E7%BB%83%E5%90%8E%E2%80%9C%E6%80%A5%E6%95%91%E2%80%9D%E8%BF%98%E6%98%AF%E8%AE%AD%E7%BB%83%E4%B8%AD%E2%80%9C%E5%85%8D%E7%96%AB%E2%80%9D%EF%BC%9F-PTQ-vs-QAT"><span class="nav-number">1.6.1.</span> <span class="nav-text">6.1 宏观工作流程：训练后“急救”还是训练中“免疫”？(PTQ vs QAT)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#6-1-1-%E8%AE%AD%E7%BB%83%E5%90%8E%E9%87%8F%E5%8C%96-Post-Training-Quantization-PTQ-%E2%80%9C%E4%BE%BF%E6%8D%B7%E7%9A%84%E6%80%A5%E6%95%91%E6%89%8B%E6%9C%AF%E2%80%9D"><span class="nav-number">1.6.1.1.</span> <span class="nav-text">6.1.1 训练后量化 (Post-Training Quantization, PTQ) - “便捷的急救手术”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-1-2-%E9%87%8F%E5%8C%96%E6%84%9F%E7%9F%A5%E8%AE%AD%E7%BB%83-Quantization-Aware-Training-QAT-%E2%80%9C%E6%98%82%E8%B4%B5%E7%9A%84%E5%9F%BA%E5%9B%A0%E5%85%8D%E7%96%AB%E2%80%9D"><span class="nav-number">1.6.1.2.</span> <span class="nav-text">6.1.2 量化感知训练 (Quantization-Aware Training, QAT) - “昂贵的基因免疫”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-1-3-%E6%80%BB%E7%BB%93%E4%B8%8E%E9%80%89%E6%8B%A9%E5%BB%BA%E8%AE%AE"><span class="nav-number">1.6.1.3.</span> <span class="nav-text">6.1.3 总结与选择建议</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2-%E6%BF%80%E6%B4%BB%E5%80%BC%E9%87%8F%E5%8C%96%E7%AD%96%E7%95%A5%EF%BC%9A%E9%9D%99%E6%80%81-vs-%E5%8A%A8%E6%80%81"><span class="nav-number">1.6.2.</span> <span class="nav-text">6.2 激活值量化策略：静态 vs. 动态</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#6-2-1-%E9%9D%99%E6%80%81%E9%87%8F%E5%8C%96-Static-Quantization-%E2%80%9C%E6%9C%AA%E5%8D%9C%E5%85%88%E7%9F%A5%E2%80%9D%EF%BC%8C%E8%BF%BD%E6%B1%82%E6%9E%81%E8%87%B4%E9%80%9F%E5%BA%A6"><span class="nav-number">1.6.2.1.</span> <span class="nav-text">6.2.1 静态量化 (Static Quantization) - “未卜先知”，追求极致速度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-2-2-%E5%8A%A8%E6%80%81%E9%87%8F%E5%8C%96-Dynamic-Quantization-%E2%80%9C%E7%9B%B8%E6%9C%BA%E8%A1%8C%E4%BA%8B%E2%80%9D%EF%BC%8C%E8%BF%BD%E6%B1%82%E6%9B%B4%E9%AB%98%E7%B2%BE%E5%BA%A6"><span class="nav-number">1.6.2.2.</span> <span class="nav-text">6.2.2 动态量化 (Dynamic Quantization) - “相机行事”，追求更高精度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-2-3-%E6%80%BB%E7%BB%93%E4%B8%8E%E9%80%89%E6%8B%A9%E5%BB%BA%E8%AE%AE"><span class="nav-number">1.6.2.3.</span> <span class="nav-text">6.2.3 总结与选择建议</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E9%87%8F%E5%8C%96%E6%9C%80%E5%A4%A7%E7%9A%84%E6%8C%91%E6%88%98%EF%BC%9A%E7%A5%9E%E7%A7%98%E7%9A%84%E2%80%9C%E5%BC%82%E5%B8%B8%E5%80%BC%E2%80%9D%EF%BC%88Outliers%EF%BC%89"><span class="nav-number">1.7.</span> <span class="nav-text">7 量化最大的挑战：神秘的“异常值”（Outliers）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#7-1-%E4%BB%80%E4%B9%88%E6%98%AF%E5%BC%82%E5%B8%B8%E5%80%BC%EF%BC%9F%E4%B8%BA%E4%BD%95%E5%AE%83%E4%BC%9A%E2%80%9C%E7%BB%91%E6%9E%B6%E2%80%9D%E9%87%8F%E5%8C%96%E8%BF%87%E7%A8%8B%EF%BC%9F"><span class="nav-number">1.7.1.</span> <span class="nav-text">7.1 什么是异常值？为何它会“绑架”量化过程？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-%E5%BC%82%E5%B8%B8%E5%80%BC%E7%9A%84%E2%80%9C%E6%B6%8C%E7%8E%B0%E2%80%9D%EF%BC%9A%E5%A4%A7%E6%A8%A1%E5%9E%8B%E7%9A%84%E2%80%9C%E6%88%90%E5%B9%B4%E7%A4%BC%E2%80%9D"><span class="nav-number">1.7.2.</span> <span class="nav-text">7.2 异常值的“涌现”：大模型的“成年礼”</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#7-2-1-%E2%80%9C%E6%B6%8C%E7%8E%B0%E2%80%9D%E7%9A%84%E8%BD%A8%E8%BF%B9%EF%BC%9A%E4%BB%8E%E9%9B%B6%E6%98%9F%E5%87%BA%E7%8E%B0%E5%88%B0%E5%85%A8%E9%9D%A2%E7%88%86%E5%8F%91"><span class="nav-number">1.7.2.1.</span> <span class="nav-text">7.2.1 “涌现”的轨迹：从零星出现到全面爆发</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-2-2-%E4%B8%8D%E4%BB%85%E5%85%B3%E4%B9%8E%E5%A4%A7%E5%B0%8F%EF%BC%8C%E6%9B%B4%E5%85%B3%E4%B9%8E%E2%80%9C%E6%99%BA%E6%85%A7%E2%80%9D"><span class="nav-number">1.7.2.2.</span> <span class="nav-text">7.2.2 不仅关乎大小，更关乎“智慧”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-2-3-%E2%80%9C%E6%88%90%E5%B9%B4%E2%80%9D%E7%9A%84%E7%83%A6%E6%81%BC%E4%B8%8E%E6%9C%BA%E9%81%87"><span class="nav-number">1.7.2.3.</span> <span class="nav-text">7.2.3 “成年”的烦恼与机遇</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-3-%E5%BC%82%E5%B8%B8%E5%80%BC%E7%9A%84%E5%8F%8C%E9%9D%A2%E6%80%A7%EF%BC%9A%E6%97%A2%E6%98%AF%E2%80%9C%E9%BA%BB%E7%83%A6%E5%88%B6%E9%80%A0%E8%80%85%E2%80%9D%EF%BC%8C%E4%B9%9F%E6%98%AF%E2%80%9C%E6%80%A7%E8%83%BD%E5%AE%88%E6%8A%A4%E7%A5%9E%E2%80%9D"><span class="nav-number">1.7.3.</span> <span class="nav-text">7.3 异常值的双面性：既是“麻烦制造者”，也是“性能守护神”</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#7-3-1-%E4%B8%80%E9%9D%A2%EF%BC%9A%E2%80%9C%E9%BA%BB%E7%83%A6%E5%88%B6%E9%80%A0%E8%80%85%E2%80%9D-%E9%87%8F%E5%8C%96%E7%B2%BE%E5%BA%A6%E7%9A%84%E2%80%9C%E6%AF%81%E7%81%AD%E8%80%85%E2%80%9D"><span class="nav-number">1.7.3.1.</span> <span class="nav-text">7.3.1 一面：“麻烦制造者” - 量化精度的“毁灭者”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-3-2-%E5%8F%A6%E4%B8%80%E9%9D%A2%EF%BC%9A%E2%80%9C%E6%80%A7%E8%83%BD%E5%AE%88%E6%8A%A4%E7%A5%9E%E2%80%9D-%E6%A8%A1%E5%9E%8B%E8%83%BD%E5%8A%9B%E7%9A%84%E5%85%B3%E9%94%AE%E6%94%AF%E6%9F%B1"><span class="nav-number">1.7.3.2.</span> <span class="nav-text">7.3.2 另一面：“性能守护神” - 模型能力的关键支柱</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-3-3-%E6%A0%B8%E5%BF%83%E7%9F%9B%E7%9B%BE%E4%B8%8E%E9%87%8F%E5%8C%96%E7%AE%97%E6%B3%95%E7%9A%84%E4%BD%BF%E5%91%BD"><span class="nav-number">1.7.3.3.</span> <span class="nav-text">7.3.3 核心矛盾与量化算法的使命</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-4-%E5%BC%82%E5%B8%B8%E5%80%BC%E7%9A%84%E5%88%86%E7%B1%BB%EF%BC%9A%E6%99%AE%E9%80%9A%E5%BC%82%E5%B8%B8%E5%80%BC%E4%B8%8E%E2%80%9C%E6%A0%B8%E5%BC%B9%E7%BA%A7%E2%80%9D%E7%9A%84%E5%B7%A8%E5%A4%A7%E5%BC%82%E5%B8%B8%E5%80%BC"><span class="nav-number">1.7.4.</span> <span class="nav-text">7.4 异常值的分类：普通异常值与“核弹级”的巨大异常值</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#7-4-1-%E6%99%AE%E9%80%9A%E5%BC%82%E5%B8%B8%E5%80%BC-Normal-Outliers-%E2%80%9C%E9%80%9A%E9%81%93%E2%80%9D%E7%9A%84%E2%80%9C%E5%B8%B8%E5%AE%A2%E2%80%9D"><span class="nav-number">1.7.4.1.</span> <span class="nav-text">7.4.1 普通异常值 (Normal Outliers) - “通道”的“常客”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-4-2-%E5%B7%A8%E5%A4%A7%E5%BC%82%E5%B8%B8%E5%80%BC-Massive-Outliers-%E2%80%9CToken%E2%80%9D%E7%9A%84%E2%80%9C%E5%A4%A9%E9%80%89%E4%B9%8B%E5%AD%90%E2%80%9D"><span class="nav-number">1.7.4.2.</span> <span class="nav-text">7.4.2 巨大异常值 (Massive Outliers) - “Token”的“天选之子”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-4-3-%E5%9B%BE%E8%A7%A3%E5%AF%B9%E6%AF%94%EF%BC%9A%E4%B8%80%E7%9B%AE%E4%BA%86%E7%84%B6%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">1.7.4.3.</span> <span class="nav-text">7.4.3 图解对比：一目了然的区别</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-5-%E8%BF%BD%E6%A0%B9%E6%BA%AF%E6%BA%90%EF%BC%9A%E5%BC%82%E5%B8%B8%E5%80%BC%E5%9C%A8Transformer%E4%B8%AD%E7%9A%84%E2%80%9C%E8%AF%9E%E7%94%9F%E4%B9%8B%E6%97%85%E2%80%9D"><span class="nav-number">1.7.5.</span> <span class="nav-text">7.5 追根溯源：异常值在Transformer中的“诞生之旅”</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#7-5-1-%E8%B5%B7%E7%82%B9%EF%BC%9ASoftmax%E7%9A%84%E2%80%9C%E8%B5%A2%E5%AE%B6%E9%80%9A%E5%90%83%E2%80%9D%E5%9B%B0%E5%A2%83"><span class="nav-number">1.7.5.1.</span> <span class="nav-text">7.5.1 起点：Softmax的“赢家通吃”困境</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-5-2-%E2%80%9C%E5%82%AC%E5%8C%96%E5%89%82%E2%80%9D%E4%B9%8B%E4%B8%80%EF%BC%9ARoPE%E7%9A%84%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81"><span class="nav-number">1.7.5.2.</span> <span class="nav-text">7.5.2 “催化剂”之一：RoPE的位置编码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-5-3-%E2%80%9C%E6%94%BE%E5%A4%A7%E5%99%A8%E2%80%9D%E4%B9%8B%E4%B8%80%EF%BC%9AFFN%E7%9A%84%E9%97%A8%E6%8E%A7%E5%8D%8F%E5%90%8C%E6%95%88%E5%BA%94"><span class="nav-number">1.7.5.3.</span> <span class="nav-text">7.5.3 “放大器”之一：FFN的门控协同效应</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-5-4-%E2%80%9C%E6%94%BE%E5%A4%A7%E5%99%A8%E2%80%9D%E4%B9%8B%E4%BA%8C%EF%BC%9ALayerNorm%E7%9A%84%E6%8E%A8%E6%B3%A2%E5%8A%A9%E6%BE%9C"><span class="nav-number">1.7.5.4.</span> <span class="nav-text">7.5.4 “放大器”之二：LayerNorm的推波助澜</span></a></li></ol></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xu feng"
+      src="/images/profile.gif">
+  <p class="site-author-name" itemprop="name">Xu feng</p>
+  <div class="site-description" itemprop="description">a happy boy :3</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/xufeng102403" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;xufeng102403" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:xf20210618@126.com" title="E-Mail → mailto:xf20210618@126.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-custom-widget" style="background: #fff; padding: 15px; margin-top: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: center;">
+      <img id="side-gif" src="/images/worm3.gif" alt="自定义动图" style="max-width: 100%; height: auto; display: block; margin: 0 auto;">
+      <p id="side-runtime" style="margin-top: 8px; font-size: 0.8em; color: #888;"></p>
+      
+      <script>
+          // 计算站点运行时间
+          function showRuntime() {
+              const now_1 = new Date();
+              
+              // 1. 根据当前小时奇偶切换GIF
+              const hour = now_1.getHours(); // 0-23
+              const gifElement = document.getElementById('side-gif');
+              if (hour % 2 === 0) {
+                  gifElement.src = '/images/worm3.gif';
+              } else {
+                  gifElement.src = '/images/eeyore.gif';
+              }
+
+              const startDate = new Date("2026-07-21T17:18:00"); // 修改为你的实际建站日期
+              const now = new Date();
+              const diff = now - startDate;
+              
+              const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+              //const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+              //const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+              //const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+              
+              document.getElementById('side-runtime').innerText = 
+                  `Nice to meet you! I've been here for ${days} days.`;
+          }
+          setInterval(showRuntime, 1000*60*10); // 每十分钟刷新
+          showRuntime();
+      </script>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  <style>
+  /* 页面所有图片默认样式 */
+  img {
+    cursor: zoom-in;
+    transition: transform 0.2s ease;
+  }
+  
+  img:hover {
+    transform: scale(1.02);
+  }
+  
+  /* 排除灯箱内部的图片，避免递归 */
+  .lightbox-overlay img {
+    cursor: zoom-out;
+    transform: none;
+  }
+  
+  .lightbox-overlay img:hover {
+    transform: none;
+  }
+  
+  /* 灯箱覆盖层 */
+  .lightbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.92);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  
+  .lightbox-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .lightbox-overlay img {
+    max-width: 100vw;
+    max-height: 100vh;
+    object-fit: contain;
+    transform: scale(0.8);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .lightbox-overlay.active img {
+    transform: scale(1);
+  }
+</style>
+
+
+
+
+
+<script>
+(function() {
+  // 等 DOM 加载完再绑定事件
+  function init() {
+    var overlay = document.getElementById('lightbox');
+    var lightboxImg = document.getElementById('lightbox-img');
+    
+    if (!overlay || !lightboxImg) {
+      console.error('灯箱元素没找到，请检查 HTML');
+      return;
+    }
+    
+    // 标记灯箱是否打开
+    var isOpen = false;
+    
+    function openLightbox(src, alt) {
+      lightboxImg.src = src;
+      lightboxImg.alt = alt || '';
+      overlay.classList.add('active');
+      isOpen = true;
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeLightbox() {
+      overlay.classList.remove('active');
+      isOpen = false;
+      document.body.style.overflow = '';
+      // 延迟清空 src，避免关闭动画时图片闪烁
+      setTimeout(function() {
+        if (!isOpen) {
+          lightboxImg.src = '';
+        }
+      }, 300);
+    }
+    
+    // 全局点击监听
+    document.addEventListener('click', function(e) {
+      var img = e.target;
+      
+      // 1. 如果点在灯箱内，关闭
+      if (overlay.contains(img)) {
+        // 点在灯箱背景空白处或图片上，都关闭
+        closeLightbox();
+        return;
+      }
+      
+      // 2. 只有点到 <img> 才处理
+      if (img.tagName !== 'IMG') return;
+      
+      // 3. 排除灯箱内的图（虽已提前处理，但加个保险）
+      if (img === lightboxImg) return;
+      
+      // 4. 排除有 data-no-zoom 的图
+      if (img.hasAttribute('data-no-zoom')) return;
+      
+      // 5. 图片在 a 标签内，跳过
+      if (img.closest('a')) return;
+      
+      // 6. 打开灯箱
+      e.preventDefault();
+      openLightbox(img.src, img.alt);
+    });
+    
+    // Esc 键关闭
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && isOpen) {
+        closeLightbox();
+      }
+    });
+  }
+  
+  // DOM 加载完成后初始化
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/09/07/%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96%E6%8A%80%E6%9C%AF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/profile.gif">
+      <meta itemprop="name" content="Xu feng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Xu feng">
+      <meta itemprop="description" content="a happy boy :3">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="模型量化技术 | Xu feng">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          模型量化技术
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2026-09-07 20:06:54 / Modified: 20:24:56" itemprop="dateCreated datePublished" datetime="2026-09-07T20:06:54+08:00">2026-09-07</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="模型量化技术"><a href="#模型量化技术" class="headerlink" title="模型量化技术"></a>模型量化技术</h1><h2 id="1-量化的定义和原理"><a href="#1-量化的定义和原理" class="headerlink" title="1 量化的定义和原理"></a>1 量化的定义和原理</h2><p>量化是一种通过使用低精度数据类型(如8位整数（int8）而不是通常的32位浮点数（float32）来表示权重和激活从而减少运行推理的计算和内存成本的技术。形象说来，量化是一次对模型<strong>有损</strong>但<strong>高效</strong>的<strong>瘦身</strong>。</p>
+<p>减少比特数意味着生成的模型需要更少的内存存储，消耗更少的能量（理论上），并且像矩阵乘法这样的操作可以用整数运算执行得更快。它还允许在嵌入式设备上运行模型，这些设备有时只支持整数数据类型。</p>
+<blockquote>
+<p>Quantization is a technique to reduce the computational and memory costs of running inference by representing the weights and activations with low-precision data types like 8-bit integer (<code>int8</code>) instead of the usual 32-bit floating point (<code>float32</code>).	——from hugging face website</p>
+</blockquote>
+<p>量化背后的基本思想非常简单：将权重和激活的高精度表示（通常是常规的32位浮点数）转换为较低精度的数据类型。最常见的低精度数据类型是：</p>
+<ul>
+<li><code>float16</code>, 累积数据类型 <code>float16</code></li>
+<li><code>bfloat16</code>, 累积数据类型 <code>float32</code></li>
+<li><code>int16</code>, 累积数据类型 <code>int32</code></li>
+<li><code>int8</code>, 累积数据类型 <code>int32</code></li>
+</ul>
+<h2 id="2-量化的对象"><a href="#2-量化的对象" class="headerlink" title="2 量化的对象"></a>2 量化的对象</h2><p>根据量化对象的不同，我们主要可以将其分为三类：<strong>权重量化</strong>、<strong>激活值量化</strong>和<strong>KV Cache量化</strong>。</p>
+<h3 id="2-1-权重量化-Weight-Quantization"><a href="#2-1-权重量化-Weight-Quantization" class="headerlink" title="2.1 权重量化 (Weight Quantization)"></a>2.1 权重量化 (Weight Quantization)</h3><p>这是最基础、最常见的量化操作。</p>
+<ul>
+<li><strong>对象</strong>：模型的所有<strong>权重参数（Weights）</strong>。权重是模型在训练过程中学习到的知识的载体，可以看作是模型的“DNA”或“知识库”。在模型训练完成后，权重的值是固定不变的，因此它们是**静态（Static）**的。</li>
+<li><strong>目标</strong>：主要目标是<strong>压缩模型的体积</strong>，降低其在硬盘上的存储占用和在推理时加载到内存（显存）中的空间。</li>
+<li><strong>特点</strong>：由于权重是静态的，对它们进行量化相对简单。我们可以在模型部署前，离线地、充分地分析权重的数值分布，找到最佳的量化方案，而无需任何额外的校准数据。</li>
+</ul>
+<h3 id="2-2-激活值量化-Activation-Quantization"><a href="#2-2-激活值量化-Activation-Quantization" class="headerlink" title="2.2 激活值量化 (Activation Quantization)"></a>2.2 激活值量化 (Activation Quantization)</h3><p>这是实现模型端到端加速的关键，但同时也更具挑战性。</p>
+<ul>
+<li><strong>对象</strong>：模型在计算过程中产生的<strong>中间激活值（Activations）</strong>。如果说权重是模型的“DNA”，那么激活值就像是模型在思考时，神经网络中流动的“实时电信号”。</li>
+<li><strong>目标</strong>：激活值量化的核心目标是为了<strong>实现极致的推理加速</strong>。只有当**权重和激活值被量化为低精度整数（如INT8）**后，我们才能让整个矩阵乘法运算完全在高效的整数计算单元上执行，从而最大限度地发挥硬件的加速潜力。</li>
+<li><strong>特点与挑战</strong>：与静态的权重不同，激活值是**动态（Dynamic）**的，它的数值分布会随着每一个不同的输入而剧烈变化。我们无法预知下一次输入会产生什么样的激活值，这使得量化变得非常困难。更糟糕的是，正如我们将在后面章节深入探讨的，LLM的激活值中常常藏着一些数值极大的“异常值”（Outliers），它们是量化过程中最主要的精度杀手。</li>
+</ul>
+<p>下图清晰地对比了<strong>仅权重量化</strong>和**权重-激活值联合量化（全量化）**的计算流程差异。</p>
+<p><img src="/images/quantization/survey_on_efficient_inference.png"></p>
+<blockquote>
+<p>图片来源：论文 A Survey on Efficient Inference for Large Language Models</p>
+</blockquote>
+<h3 id="2-3-KV-Cache量化"><a href="#2-3-KV-Cache量化" class="headerlink" title="2.3 KV Cache量化"></a>2.3 KV Cache量化</h3><p>这是一种针对Transformer架构，特别是长文本推理场景下的核心优化技术。</p>
+<ul>
+<li><strong>对象</strong>：自注意力机制中用于存储上下文历史信息的<strong>键（Key）和值（Value）缓存，即KV Cache</strong>。KV Cache可以被看作是模型的“记忆”，模型每生成一个新词，都要回顾一遍完整的KV Cache。</li>
+<li><strong>目标</strong>：主要目标是<strong>节省推理时的显存占用</strong>。正如引言中提到的，KV Cache的体积会随着序列长度线性增长，是长文本应用中最主要的显存瓶颈。通过将其从FP16量化到INT8甚至更低，可以成倍地降低这部分“短期记忆”的占用空间。</li>
+<li><strong>特点</strong>：对KV Cache进行量化，能让模型在有限的显存下处理更长的文本序列，或者在同样序列长度下支持更大的批量（Batch Size），从而显著提升系统的吞吐量和效率。</li>
+</ul>
+<p><img src="/images/quantization/llm-qbench.png"></p>
+<blockquote>
+<p>图片来源：论文LLM-QBench：A Benchmark Towards the Best Practice for Post-training Quantization of Large Language Models</p>
+</blockquote>
+<h2 id="3-量化与数值表示"><a href="#3-量化与数值表示" class="headerlink" title="3 量化与数值表示"></a>3 量化与数值表示</h2><h3 id="3-1-浮点数家族（FP）：精度与范围的艺术"><a href="#3-1-浮点数家族（FP）：精度与范围的艺术" class="headerlink" title="3.1 浮点数家族（FP）：精度与范围的艺术"></a>3.1 浮点数家族（FP）：精度与范围的艺术</h3><p>要真正理解量化，我们必须先成为“数字世界的解剖学家”，解剖构成现代AI模型的“细胞”——<strong>浮点数（Floating-Point, FP）</strong>。为什么有FP32，又有FP16、BF16，甚至更新的FP8？因为在有限的比特空间内，对一个数字的表示永远是一场关于**“范围”（Range）<strong>和</strong>“精度”（Precision）**的艺术性权衡。</p>
+<table>
+<thead>
+<tr>
+<th align="left">格式</th>
+<th align="left">精度名称</th>
+<th align="left">总位数</th>
+<th align="left">符号位</th>
+<th align="left">指数位</th>
+<th align="left">尾数位</th>
+<th align="left">最小值（正规格化）</th>
+<th align="left">最大值</th>
+<th align="left">主要用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>FP4</strong></td>
+<td align="left">4位浮点</td>
+<td align="left">4 bit</td>
+<td align="left">1</td>
+<td align="left">2</td>
+<td align="left">1</td>
+<td align="left">~1.25 × 10<sup>-7</sup></td>
+<td align="left">~30.0</td>
+<td align="left">极端压缩推理（小模型&#x2F;边缘设备）</td>
+</tr>
+<tr>
+<td align="left"><strong>FP8 (E4M3)</strong></td>
+<td align="left">8位浮点（4指3尾）</td>
+<td align="left">8 bit</td>
+<td align="left">1</td>
+<td align="left">4</td>
+<td align="left">3</td>
+<td align="left">~1.46 × 10<sup>-6</sup></td>
+<td align="left">~448</td>
+<td align="left">大模型推理（权重&#x2F;激活值）</td>
+</tr>
+<tr>
+<td align="left"><strong>FP8 (E5M2)</strong></td>
+<td align="left">8位浮点（5指2尾）</td>
+<td align="left">8 bit</td>
+<td align="left">1</td>
+<td align="left">5</td>
+<td align="left">2</td>
+<td align="left">~2.98 × 10<sup>-6</sup></td>
+<td align="left">~5.73 × 10<sup>4</sup></td>
+<td align="left">大模型训练（梯度存储）</td>
+</tr>
+<tr>
+<td align="left"><strong>FP16</strong></td>
+<td align="left">半精度</td>
+<td align="left">16 bit</td>
+<td align="left">1</td>
+<td align="left">5</td>
+<td align="left">10</td>
+<td align="left">~6.10 × 10<sup>-5</sup></td>
+<td align="left">~6.55 × 10<sup>4</sup></td>
+<td align="left">GPU训练、推理加速</td>
+</tr>
+<tr>
+<td align="left"><strong>BF16</strong></td>
+<td align="left">脑浮点</td>
+<td align="left">16 bit</td>
+<td align="left">1</td>
+<td align="left">8</td>
+<td align="left">7</td>
+<td align="left">~1.18 × 10<sup>-38</sup></td>
+<td align="left">~3.39 × 10<sup>38</sup></td>
+<td align="left">大模型训练（A100&#x2F;H100）</td>
+</tr>
+<tr>
+<td align="left"><strong>FP32</strong></td>
+<td align="left">单精度</td>
+<td align="left">32 bit</td>
+<td align="left">1</td>
+<td align="left">8</td>
+<td align="left">23</td>
+<td align="left">~1.18 × 10<sup>-38</sup></td>
+<td align="left">~3.40 × 10<sup>38</sup></td>
+<td align="left">通用训练、科学计算</td>
+</tr>
+</tbody></table>
+<h3 id="3-2-整数家族（INT）：量化的终点"><a href="#3-2-整数家族（INT）：量化的终点" class="headerlink" title="3.2 整数家族（INT）：量化的终点"></a>3.2 整数家族（INT）：量化的终点</h3><p>在上一节剖析了结构复杂、表示精准的浮点数家族后，我们现在将目光转向它们更“接地气”的亲戚——<strong>整数（Integer, INT）家族</strong>。如果说浮点数是AI世界的“贵族”，那么整数就是高效勤恳的“工兵”。模型量化的核心目的，正是要将信息从“贵族”能够理解的复杂语言，翻译成“工兵”能够高效执行的简洁指令。</p>
+<p>整数的本质是<strong>定点数（Fixed-Point）</strong>，即小数点的位置被固定（通常在末尾）。这种表示法牺牲了浮点数那样的宽动态范围和高精度，换来的是两个无与伦比的优势：<strong>极简的结构</strong>和<strong>极高的运算效率</strong>。这正是硬件所钟爱的特性。</p>
+<table>
+<thead>
+<tr>
+<th align="left">格式</th>
+<th align="left">总位数</th>
+<th align="left">有无符号</th>
+<th align="left">最小值</th>
+<th align="left">最大值</th>
+<th align="left">可表示数值总数</th>
+<th align="left">机器精度（ε）</th>
+<th align="left">主要用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>INT4 (无符号)</strong></td>
+<td align="left">4 bit</td>
+<td align="left">无</td>
+<td align="left">0</td>
+<td align="left">15</td>
+<td align="left">16</td>
+<td align="left">1.0</td>
+<td align="left">极致压缩（边缘AI、NPU）</td>
+</tr>
+<tr>
+<td align="left"><strong>INT4 (有符号)</strong></td>
+<td align="left">4 bit</td>
+<td align="left">有</td>
+<td align="left">-8</td>
+<td align="left">7</td>
+<td align="left">16</td>
+<td align="left">1.0</td>
+<td align="left">极致压缩（权重量化）</td>
+</tr>
+<tr>
+<td align="left"><strong>INT8 (无符号)</strong></td>
+<td align="left">8 bit</td>
+<td align="left">无</td>
+<td align="left">0</td>
+<td align="left">255</td>
+<td align="left">256</td>
+<td align="left">1.0</td>
+<td align="left">图像像素、模型量化主流</td>
+</tr>
+<tr>
+<td align="left"><strong>INT8 (有符号)</strong></td>
+<td align="left">8 bit</td>
+<td align="left">有</td>
+<td align="left">-128</td>
+<td align="left">127</td>
+<td align="left">256</td>
+<td align="left">1.0</td>
+<td align="left">通用量化推理</td>
+</tr>
+<tr>
+<td align="left"><strong>INT16 (无符号)</strong></td>
+<td align="left">16 bit</td>
+<td align="left">无</td>
+<td align="left">0</td>
+<td align="left">65,535</td>
+<td align="left">65,536</td>
+<td align="left">1.0</td>
+<td align="left">音频采样、嵌入式传感器</td>
+</tr>
+<tr>
+<td align="left"><strong>INT16 (有符号)</strong></td>
+<td align="left">16 bit</td>
+<td align="left">有</td>
+<td align="left">-32,768</td>
+<td align="left">32,767</td>
+<td align="left">65,536</td>
+<td align="left">1.0</td>
+<td align="left">音频处理、通用整数运算</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>关键说明</strong>：整数的”机器精度”固定为 1.0（最小分辨率为1），因为整数是离散的，相邻两个值之间永远相差 1，不存在浮点数那样的相对精度概念。</p>
+</blockquote>
+<h2 id="4-量化与反量化"><a href="#4-量化与反量化" class="headerlink" title="4 量化与反量化"></a>4 量化与反量化</h2><p>在认识了浮点数和整数这两个“物种”之后，我们现在要来学习连接它们之间桥梁的“语法书”——<strong>量化与反量化公式</strong>。正是这套简洁而精妙的数学法则，构成了所有量化技术的基础。</p>
+<p>我们主要讨论的是<strong>线性量化（Linear Quantization）</strong>，这也是当前应用最广泛的方案。它的目标是在浮点数和整数之间建立一个简单的、一一对应的线性映射关系。</p>
+<p>要搭建这座转换的桥梁，我们需要两个核心的“建筑构件”：<strong>缩放因子（Scale）<strong>和</strong>零点（Zero-Point）</strong>。</p>
+<h3 id="4-1-核心构件一：缩放因子-Scale-s-或-Δ-定义“汇率”"><a href="#4-1-核心构件一：缩放因子-Scale-s-或-Δ-定义“汇率”" class="headerlink" title="4.1 核心构件一：缩放因子 (Scale, s 或 Δ) - 定义“汇率”"></a>4.1 核心构件一：缩放因子 (Scale, s 或 Δ) - 定义“汇率”</h3><p>缩放因子是量化中最关键的概念，我们可以把它理解为浮点数世界和整数世界之间的**“汇率”或“地图比例尺”**。它定义了一个整数单位（比如1）等价于多少浮点数值。</p>
+<ul>
+<li><p><strong>物理意义</strong>: 如果<code>s = 0.1</code>，就意味着整数<code>1</code>代表浮点数<code>0.1</code>，整数<code>2</code>代表浮点数<code>0.2</code>，以此类推。<code>s</code>的值越小，量化的精度就越高。</p>
+</li>
+<li><p><strong>计算方法</strong>: <code>s</code>是通过原始浮点数的范围和目标整数的范围来计算的。</p>
+<p>  $$s &#x3D; \frac{r_{max} - r_{min}}{q_{max} - q_{min}}$$</p>
+</li>
+<li><p>$r_{max}$和 $r_{min}$ ：你想要量化的那批浮点数中的最大值和最小值。</p>
+</li>
+<li><p>$q_{max}$ 和 $q_{min}$ ：目标整数格式所能表示的最大值和最小值（例如，对于无符号INT8，就是255和0）。</p>
+</li>
+</ul>
+<h3 id="4-2-核心构件二：零点-Zero-Point-z-校准“原点”"><a href="#4-2-核心构件二：零点-Zero-Point-z-校准“原点”" class="headerlink" title="4.2 核心构件二：零点 (Zero-Point, z) - 校准“原点”"></a>4.2 核心构件二：零点 (Zero-Point, z) - 校准“原点”</h3><p>如果说缩放因子定义了“步长”，那么零点就是用来校准“起点”的。</p>
+<ul>
+<li><strong>物理意义</strong>: 它的核心使命是确保浮点数世界中的**<code>0.0</code><strong>能够被整数世界中的某个值</strong>精确表示**，从而避免引入系统性的偏差（bias）。</li>
+<li><strong>为何需要</strong>: 想象一下，我们要量化的浮点数范围是<code>[-10.5, +30.2]</code>，这是一个非对称的范围。如果我们想把它映射到<code>[0, 255]</code>这个整数区间，浮点<code>0.0</code>应该对应哪个整数呢？零点<code>z</code>就是这个负责对齐的整数偏移量。</li>
+<li><strong>与对称&#x2F;非对称的关系</strong>:<ul>
+<li>在**非对称量化（Asymmetric Quantization）**中，<code>z</code>通常是一个非零整数，以完美适配非对称的数据分布（如ReLU激活函数后的值）。</li>
+<li>在**对称量化（Symmetric Quantization）**中，我们会强制让浮点范围关于0对称（如<code>[-30.2, +30.2]</code>），这样浮点<code>0.0</code>就能自然地映射到整数<code>0</code>（对于有符号整数）或者<code>127/128</code>附近（对于无符号整数），此时<code>z</code>就可以固定为0或接近中间值，简化计算。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-3-完整流程：量化与反量化公式"><a href="#4-3-完整流程：量化与反量化公式" class="headerlink" title="4.3 完整流程：量化与反量化公式"></a>4.3 完整流程：量化与反量化公式</h3><p>有了缩放因子<code>s</code>和零点<code>z</code>，我们就可以进行完整的“翻译”工作了。</p>
+<p><img src="/images/quantization/fast_and_efficient.jpg"></p>
+<ol>
+<li><strong>量化 (Quantization) - 从浮点到整数</strong> $q&#x3D;clip(round(\dfrac{r}{s}+z), q_{min}, q_{max})$这个过程可以分解为四步：</li>
+</ol>
+<ul>
+<li><strong>缩放</strong>: 将原始浮点数<code>r</code>除以缩放因子<code>s</code>，将其“压缩”到单位尺度。</li>
+<li><strong>平移</strong>: 加上零点<code>z</code>，将原点对齐。</li>
+<li><strong>取整</strong>: 使用<code>round</code>函数将结果四舍五入到最近的整数。<strong>这是量化误差（Quantization Error）最主要的来源</strong>，因为小数部分的信息在这里被丢弃了。</li>
+<li><strong>截断</strong>: 使用<code>clip</code>函数确保最终的整数值<code>q</code>不会超出目标范围（例如<code>[0, 255]</code>），防止溢出。</li>
+</ul>
+<ol start="2">
+<li><strong>反量化 (Dequantization) - 从整数到浮点</strong> $r̂&#x3D;(q-z)×s$这个过程是量化的逆运算，用于将量化后的整数<code>q</code>近似地恢复回浮点数 。在很多场景下，比如当硬件不支持整数运算时，或者在计算的最后一步需要浮点输出时，就需要执行反量化。</li>
+</ol>
+<p>虽然这些公式看起来很简单，但整个模型量化技术的博大精深之处，正在于<strong>如何为不同的权重和激活值，找到最优的$r_{max}$和$r_{min}$，从而计算出能最大程度保留模型信息的<code>s</code>和<code>z</code></strong>。这正是我们将在后续章节探讨的各种高级量化策略（如裁剪、校准）和算法（如GPTQ、AWQ）所要解决的核心问题。</p>
+<h2 id="5-仅权重量化与全量化"><a href="#5-仅权重量化与全量化" class="headerlink" title="5 仅权重量化与全量化"></a>5 仅权重量化与全量化</h2><p>在我们理解了量化的基础构件之后，便来到了实践中的第一个关键抉择点：究竟是对模型的哪个部分进行量化？是只压缩占据大量存储空间的<strong>权重</strong>，还是连同在计算中不断流动的<strong>激活值</strong>也一并处理？这催生了两条主流的技术路径：<strong>仅权重量化（Weight-only Quantization）<strong>和</strong>全量化（Full Quantization）</strong>。</p>
+<h3 id="5-1-仅权重量化：专注核心，简单高效"><a href="#5-1-仅权重量化：专注核心，简单高效" class="headerlink" title="5.1 仅权重量化：专注核心，简单高效"></a>5.1 仅权重量化：专注核心，简单高效</h3><p><strong>仅权重量化</strong>是一种“抓大放小”的策略，也是目前社区中最流行、最容易上手的量化方案。它将优化的焦点完全集中在模型参数这个“最大的目标”上。</p>
+<h4 id="5-1-1-核心定义与工作流程"><a href="#5-1-1-核心定义与工作流程" class="headerlink" title="5.1.1 核心定义与工作流程"></a>5.1.1 <strong>核心定义与工作流程</strong></h4><p>顾名思义，仅权重量化就是<strong>只对模型中静态的、预先训练好的权重（Weights）参数进行低精度转换</strong>（例如从FP16转换为INT8或INT4），而计算过程中动态产生的<strong>激活值（Activations）则保持原有的高精度格式</strong>（如FP16）。</p>
+<p>我们可以做一个形象的比喻：这就像是我们将一本厚重的精装版百科全书（权重）换成了一部轻便的、经过压缩排版的平装版（权重）。书中的知识（模型能力）没有变，但书本本身变得更容易携带和翻阅了。而我们在阅读时所做的笔记（激活值）仍然是用原来的精细笔迹书写的。</p>
+<p>它的工作流程非常清晰，如下图（a）部分所示：</p>
+<p><img src="/images/quantization/survey_on_efficient_inference_1.png"></p>
+<ol>
+<li><strong>加载（Load）</strong>: 在推理时，首先从GPU显存中快速加载经过压缩的、低精度的权重。这是节省时间的第一步。</li>
+<li><strong>反量化（De-quantize）</strong>: 在权重进入计算单元<strong>之前</strong>，一个关键的步骤是将其“解压”，即通过反量化操作，迅速恢复成高精度的FP16格式。</li>
+<li><strong>计算（Compute）</strong>: 最终，核心的矩阵乘法是在高精度下完成的，即 $FP16_{activation} 𐄂 FP16_{weight}$。</li>
+</ol>
+<h4 id="5-1-2-优点：为何它如此受欢迎？"><a href="#5-1-2-优点：为何它如此受欢迎？" class="headerlink" title="5.1.2 优点：为何它如此受欢迎？"></a>5.1.2 <strong>优点：为何它如此受欢迎？</strong></h4><ol>
+<li><strong>实现简单</strong>: 由于只处理静态的权重，整个过程相对简单。我们可以在模型部署前离线完成所有转换，不需要像处理动态激活值那样复杂。</li>
+<li><strong>通常无需校准数据</strong>: 因为我们不量化依赖于输入的激活值，所以通常不需要准备一个“校准数据集”来分析其动态范围，这大大降低了实施门槛。</li>
+<li><strong>精度损失风险较低</strong>: 因为核心的计算仍然在高精度下进行，所以相比于全量化，它对模型最终精度的影响通常更小，方案更为“安全”。</li>
+</ol>
+<h4 id="5-1-3-性能提升的真相：并非算得更快，而是等得更短"><a href="#5-1-3-性能提升的真相：并非算得更快，而是等得更短" class="headerlink" title="5.1.3 性能提升的真相：并非算得更快，而是等得更短"></a>5.1.3 <strong>性能提升的真相：并非算得更快，而是等得更短</strong></h4><p>一个非常重要且容易被误解的问题是：既然计算最终还是FP16 \times FP16，那速度到底是怎么提升的呢？</p>
+<p>答案是：<strong>性能提升的核心来源并非计算加速，而是内存带宽的节省。</strong></p>
+<p>对于大语言模型，尤其是在逐个生成token的解码（decoding）阶段，系统的瓶颈往往不是GPU的计算速度不够快，而是<strong>访存速度太慢</strong>。GPU需要花费大量时间等待那庞大的权重矩阵从显存（HBM）中被读取到计算核心。这个过程是典型的<strong>访存密集型（IO bound）</strong>。</p>
+<p>仅权重量化通过将权重压缩4倍（INT8）甚至8倍（INT4），极大地减少了需要传输的数据量。<strong>数据传输时间缩短了，GPU等待的时间就变短了，因此端到端的推理延迟就降低了</strong>。我们是“等”得更短了，而不是“算”得更快了。</p>
+<h4 id="5-1-4-适用场景与局限"><a href="#5-1-4-适用场景与局限" class="headerlink" title="5.1.4 适用场景与局限"></a>5.1.4 <strong>适用场景与局限</strong></h4><ul>
+<li><strong>最适用场景</strong>: 需要显著减小模型体积、降低内存占用，并对推理延迟有一定优化需求的场景。它是资源有限环境下部署大模型的绝佳“入门级”方案。</li>
+<li><strong>局限性</strong>:<ul>
+<li><strong>加速效果有上限</strong>: 因为没有利用到硬件的整数计算单元，其加速效果不如全量化来得彻底。</li>
+<li><strong>Prefill阶段可能变慢</strong>: 在处理初始长文本（Prefill）这种计算密集型阶段，由于多了一个反量化的操作，仅权重量化甚至可能会带来微小的性能下降。</li>
+</ul>
+</li>
+</ul>
+<p>总而言之，仅权重量化是一种非常务实且高效的量化策略，它用相对较小的代价，解决了模型“太大太重”的核心痛点，并带来了可观的性能收益，是理解和应用大模型量化技术一个完美的起点。</p>
+<h3 id="5-2-全量化：端到端加速，释放硬件全部潜力"><a href="#5-2-全量化：端到端加速，释放硬件全部潜力" class="headerlink" title="5.2 全量化：端到端加速，释放硬件全部潜力"></a>5.2 全量化：端到端加速，释放硬件全部潜力</h3><p>如果说“仅权重量化”是一次精准、低风险的局部优化，那么<strong>全量化（Full Quantization）</strong>，又称为<strong>权重-激活值联合量化（Weight-Activation Quantization）</strong>，则是一场更彻底、更全面的性能“革命”。它追求的不是简单的“瘦身”，而是对模型整个计算流程的“基因改造”，以压榨出硬件的最后一滴性能。</p>
+<h4 id="5-2-1-核心定义与工作流程"><a href="#5-2-1-核心定义与工作流程" class="headerlink" title="5.2.1 核心定义与工作流程"></a>5.2.1 <strong>核心定义与工作流程</strong></h4><p>全量化的核心定义非常清晰：它将模型中的**权重（Weights）<strong>和</strong>激活值（Activations）**这两个参与核心计算的关键单元，<strong>同时</strong>量化到低精度格式（通常是INT8）。</p>
+<p>我们可以使用赛车的比喻：如果说仅权重量化是只更换了赛车的“轻量化轮胎”（权重），那么全量化就是连赛车在赛道上行驶时流经引擎的“空气和燃油”（激活值）也一并进行了优化处理，让整个动力系统都在最高效的状态下协同工作。</p>
+<p>其工作流程，如下图（b）部分所示，与仅权重量化有着本质的区别：</p>
+<p><img src="/images/quantization/survey_on_efficient_inference_2.png"></p>
+<ol>
+<li><strong>激活值量化（Activation Quantization）</strong>: 当高精度的激活值（如FP16）从上一层流过来时，它首先会经过一个**量化（Quantization）**步骤，被动态地（或基于静态校准参数）转换为低精度的INT8格式。</li>
+<li><strong>低精度整数计算（Integer Compute）</strong>: 接下来，核心的矩阵乘法变成了一次极高效的 整数运算。这个步骤可以直接在GPU的Tensor Core等专用硬件上执行，速度极快。</li>
+<li><strong>反量化（De-quantize）</strong>: 计算得到的累加结果（通常是INT32精度，以防溢出）在需要时（例如，需要与一个高精度的残差连接相加，或作为最终输出时），再通过<strong>反量化</strong>步骤恢复为高精度格式。</li>
+</ol>
+<h4 id="5-2-2-优点：为何要追求全量化？"><a href="#5-2-2-优点：为何要追求全量化？" class="headerlink" title="5.2.2 优点：为何要追求全量化？"></a>5.2.2 <strong>优点：为何要追求全量化？</strong></h4><ol>
+<li><strong>极致的性能释放</strong>: 这是全量化最核心的价值。通过实现<strong>端到端的低精度计算</strong>，它能够完全避免耗时的浮点运算，最大限度地利用现代硬件中为整数运算设计的“高速公路”。在支持的硬件上，其推理速度可以达到FP32的<strong>数倍</strong>之多，是追求极致低延迟和高吞吐量场景的终极方案。</li>
+<li><strong>全面的带宽优化</strong>: 不仅是权重的加载，计算过程中在各层之间流动的激活值也变成了低精度格式。这意味着在整个模型的“血液循环”中，数据传输的压力都得到了缓解，进一步降低了访存瓶颈。</li>
+</ol>
+<h4 id="5-2-3-挑战：力量的代价"><a href="#5-2-3-挑战：力量的代价" class="headerlink" title="5.2.3 挑战：力量的代价"></a>5.2.3 <strong>挑战：力量的代价</strong></h4><p>获得极致性能的背后，是全量化需要面对的严峻挑战，而这些挑战几乎全部集中在如何处理“激活值”上。</p>
+<ul>
+<li><p><strong>激活值的量化难题</strong>: 我们在后续章节会深入探讨，激活值的数值分布是动态的、不稳定的，并且常常包含一些数值极其巨大的**“异常值”（Outliers）**。这些异常值会严重干扰量化过程，导致巨大的精度损失。</p>
+<p><img src="/images/quantization/smoothquant_1.png" alt="截屏2026-08-21 16.25.40"></p>
+<blockquote>
+<p>图片来源：论文SmoothQuant：Accurate and Efficient Post-Training Quantization for Large Language Models</p>
+</blockquote>
+</li>
+<li><p><strong>更高的精度风险</strong>: 直接对这些棘手的激活值进行量化，就像是用一把刻度很粗的尺子去测量一个形状极其不规则的物体，很容易产生巨大的测量误差。因此，全量化方案，特别是对于低至4比特的量化，其模型精度的下降风险远高于仅权重量化。</p>
+</li>
+<li><p><strong>对校准的强依赖</strong>: 为了解决上述难题，并保证量化后的模型精度，全量化（尤其是追求高性能的静态全量化）强依赖于一个关键步骤——<strong>校准（Calibration）</strong>。我们需要一个“引路人”来提前告诉我们激活值的“大致样貌”，而这个引路人，就是我们将要介绍的<strong>校准数据集</strong>。</p>
+</li>
+</ul>
+<p>总而言之，全量化代表了通过量化技术所能达到的性能优化的顶峰。但这份力量并非唾手可得，它要求我们必须更深入地理解和处理模型内部动态数据的复杂性，尤其是那些棘手又关键的激活值。</p>
+<h3 id="5-3-为何需要校准数据集？——-激活值量化的“引路人”"><a href="#5-3-为何需要校准数据集？——-激活值量化的“引路人”" class="headerlink" title="5.3 为何需要校准数据集？—— 激活值量化的“引路人”"></a>5.3 为何需要校准数据集？—— 激活值量化的“引路人”</h3><p>在上一节，我们明确了“全量化”是追求极致性能的理想路径，但也指出了它最大的挑战在于处理<strong>动态的、不稳定的激活值</strong>。权重是静态的，其数值分布在模型训练后便已尘埃落定，我们可以从容地离线分析它。但激活值不同，它的分布随着每一个不同的输入而剧烈变化。</p>
+<p>这就带来了一个核心矛盾：如果我们想实现最高效的<strong>静态量化</strong>（即为每一层预先计算好一套固定不变的量化参数s和z），我们应该以哪个输入下的激活值分布为准呢？如果选的范围太窄，新来的数据可能会溢出；如果选的范围太宽，又会损失精度。</p>
+<p>为了解决这个难题，一个关键的角色应运而生——<strong>校准数据集（Calibration Dataset）</strong>。</p>
+<h4 id="5-3-1-校准集的角色：激活值分布的“星探”"><a href="#5-3-1-校准集的角色：激活值分布的“星探”" class="headerlink" title="5.3.1 校准集的角色：激活值分布的“星探”"></a>5.3.1 <strong>校准集的角色：激活值分布的“星探”</strong></h4><p>首先要明确，校准数据集<strong>不是训练集</strong>。它通常是<strong>一小部分（例如几百到一千个）能够代表模型未来真实输入数据分布的样本集合</strong>。你可以从你的训练集中抽取一小部分，或者使用一些有代表性的真实世界数据。</p>
+<p>它的唯一使命，就是充当一个“引路人”，帮助我们在模型正式部署前，<strong>“窥探”并“统计”出激活值通常会呈现出什么样的数值分布</strong>。</p>
+<h4 id="5-3-2-校准流程：“量化”前的彩排"><a href="#5-3-2-校准流程：“量化”前的彩排" class="headerlink" title="5.3.2 校准流程：“量化”前的彩排"></a>5.3.2 <strong>校准流程：“量化”前的彩排</strong></h4><p>校准的过程，就像是为模型量化进行的一次“彩排”。整个流程大致如下：</p>
+<ol>
+<li><strong>前向传播</strong>: 将校准数据集中的样本，逐一输入到原始的、未经量化的FP32模型中。</li>
+<li><strong>观察与记录</strong>: 在模型进行前向传播时，我们在需要量化激活值的每一层后面都安插一个“观察者”。这个观察者会忠实地记录下流经该层的所有激活值的数值，并通常会将它们统计成一个<strong>直方图（Histogram）</strong>，以描绘其完整的分布轮廓。</li>
+<li><strong>分析与决策</strong>: 当所有校准数据都“过”一遍模型后，我们就为每一层的激活值都收集到了一个“典型”的分布图。接下来，就是最关键的一步——根据这个分布，用特定的<strong>校准算法</strong>来计算出该层最优的、固定不变的量化参数s和z。</li>
+</ol>
+<h4 id="5-3-3-校准算法：从“简单粗暴”到“智能裁剪”"><a href="#5-3-3-校准算法：从“简单粗暴”到“智能裁剪”" class="headerlink" title="5.3.3 校准算法：从“简单粗暴”到“智能裁剪”"></a>5.3.3 <strong>校准算法：从“简单粗暴”到“智能裁剪”</strong></h4><p>如何根据收集到的分布信息来确定最佳的量化范围（即 $r_{max}$ 和 $r_{min}$ ），是不同校准算法的核心区别。</p>
+<p><strong>1. 简单粗暴的<code>max-min</code>法</strong></p>
+<p>这是最直观的方法：直接使用在校准过程中观测到的激活值的<strong>最大值</strong>作为 $r_{max}$，<strong>最小值</strong>作为 $r_{min}$。这种方法虽然简单，但有一个致命的缺陷：<strong>对异常值（Outliers）极其敏感</strong>。<br>举个极端的例子：假设某一层激活值，99.9%的数值都稳定在之间，但校准数据中恰好有一个样本，使激活值出现了一个10000的异常值。如果使用<code>max-min</code>法，量化范围就会被这个异常值“绑架”，变成。这会导致那99.9%的正常值被挤压到极小的整数范围内，从而损失大量有效信息。</p>
+<p><strong>2. 更智能的裁剪策略（Clipping）</strong></p>
+<p>为了解决异常值问题，更高级的校准算法会采用“裁剪”的策略，即<strong>主动忽略一小部分极端值</strong>，为占绝大多数的正常值寻求一个更优的量化范围。</p>
+<blockquote>
+<p>通过设定一个阈值（如255），将超出范围的异常值（500）“裁剪”掉，使其与阈值边界一同映射，从而保护了内部值的精度</p>
+</blockquote>
+<p>常见的智能裁剪策略包括：</p>
+<ul>
+<li><strong>百分位法（Percentile）</strong>: 一种简单有效的启发式方法。例如，不取100%的最大&#x2F;最小值，而是取99.9%分位点的值作为量化范围，直接忽略掉最极端的0.1%的异常值。</li>
+<li><strong>KL散度法（KL Divergence）</strong>: 一种更精妙的、基于信息论的方法。它会尝试不同的裁剪阈值T，并计算每个阈值下，量化后的数据分布与原始数据分布之间的<strong>信息损失（用KL散度衡量）</strong>。最终，它会选择那个能使信息损失最小的阈值 作为量化范围。这是NVIDIA TensorRT等工具中采用的先进方法。</li>
+<li><strong>均方误差法（MSE）</strong>: 寻找一个能量化范围，使得量化再反量化后的值与原始值之间的均方误差最小。</li>
+</ul>
+<h2 id="6-量化的策略从宏观到微观的选择"><a href="#6-量化的策略从宏观到微观的选择" class="headerlink" title="6 量化的策略从宏观到微观的选择"></a>6 量化的策略从宏观到微观的选择</h2><p>在实际操作中，量化并非只有一种固定的模式，它更像一个**“乐高”积木盒**，提供了多种组件和策略，我们可以根据不同的需求（模型、硬件、性能目标）来自由组合，搭建出最适合的量化方案。本章，我们就将全面解析这些关键的策略选择。</p>
+<h3 id="6-1-宏观工作流程：训练后“急救”还是训练中“免疫”？-PTQ-vs-QAT"><a href="#6-1-宏观工作流程：训练后“急救”还是训练中“免疫”？-PTQ-vs-QAT" class="headerlink" title="6.1 宏观工作流程：训练后“急救”还是训练中“免疫”？(PTQ vs QAT)"></a>6.1 宏观工作流程：训练后“急救”还是训练中“免疫”？(PTQ vs QAT)</h3><p>这是我们在量化之旅中遇到的第一个，也是最重要的战略分岔路。它决定了我们是在模型“成型之后”对其进行改造，还是在“成长过程”中就为其注入抗体。</p>
+<h4 id="6-1-1-训练后量化-Post-Training-Quantization-PTQ-“便捷的急救手术”"><a href="#6-1-1-训练后量化-Post-Training-Quantization-PTQ-“便捷的急救手术”" class="headerlink" title="6.1.1 训练后量化 (Post-Training Quantization, PTQ) - “便捷的急救手术”"></a>6.1.1 <strong>训练后量化 (Post-Training Quantization, PTQ) - “便捷的急救手术”</strong></h4><p>PTQ是目前大语言模型领域应用最广泛的方案，正如其名，它的所有操作都在模型<strong>训练完成之后</strong>进行。</p>
+<p><strong>核心理念</strong>: 将一个已经完全训练好的、高精度的FP32模型视为一个“成品”。我们不对其内部的训练过程做任何干涉，而是像一个外科医生一样，在外部对这个成品进行一次低风险的“微创手术”，将其转换为低精度格式。</p>
+<p><strong>工作流程</strong>:</p>
+<ol>
+<li>拿到一个训练好的FP32模型。</li>
+<li>准备一个<strong>校准数据集</strong>。</li>
+<li>通过校准过程，为模型的权重和激活值计算出最佳的量化参数（s和z）。</li>
+<li>使用这些参数，将模型转换为最终的量化模型（如INT8）。</li>
+</ol>
+<p><strong>优点</strong>:</p>
+<ul>
+<li><strong>简单高效，成本极低</strong>: 这是PTQ最大的优势。它避免了重新训练大模型那天文数字般的计算开销，整个过程只需要少量数据和有限的计算资源，几小时内就能完成。</li>
+<li><strong>数据无关性强</strong>: 它不依赖于庞大的原始训练数据集，只需要一小部分有代表性的校准数据即可，大大降低了实施门槛。</li>
+</ul>
+<p><strong>缺点</strong>:</p>
+<ul>
+<li><strong>精度损失风险</strong>: 由于模型在原始训练时，并不知道自己未来会被量化，这种“后知后觉”的转换可能会带来一定的精度损失。尤其是在进行4比特等超低比特量化时，精度下降的风险会更大。</li>
+</ul>
+<h4 id="6-1-2-量化感知训练-Quantization-Aware-Training-QAT-“昂贵的基因免疫”"><a href="#6-1-2-量化感知训练-Quantization-Aware-Training-QAT-“昂贵的基因免疫”" class="headerlink" title="6.1.2 量化感知训练 (Quantization-Aware Training, QAT) - “昂贵的基因免疫”"></a>6.1.2 <strong>量化感知训练 (Quantization-Aware Training, QAT) - “昂贵的基因免疫”</strong></h4><p>与PTQ的“术后改造”不同，QAT选择在模型的“成长发育期”就介入。</p>
+<p><strong>核心理念</strong>: 在模型的<strong>训练或微调过程</strong>中，就让它“感知”到量化的存在。它通过在网络中插入“伪量化算子”（Fake Quantization Operators）来模拟量化操作在训练时可能带来的误差（如取整、裁剪等）。</p>
+<p><strong>工作流程</strong>:</p>
+<ul>
+<li>在训练的前向传播中，伪量化算子会实时地将FP32的权重和激活值“伪装”成量化后的样子再参与运算。</li>
+<li>在反向传播计算梯度时，由于常规的量化操作（如<code>round</code>）是不可导的，QAT会使用一种名为**直通估计器（Straight-Through Estimator, STE）**的技巧，近似地将梯度“穿透”伪量化算子，传递给原始的FP32权重，从而让模型在训练中学会如何调整自己，以主动适应和规避量化带来的误差。</li>
+</ul>
+<p><img src="/images/quantization/survey_of_quant_method.png"></p>
+<blockquote>
+<p>图片来源：论文 A Survey of Quantization Methods for Efficient Neural Network Inference</p>
+<p>QAT中STE的工作原理：前向传播时使用不可导的量化器（绿色阶梯函数），反向传播时则用一个导数为1的恒等函数（绿色直线）来近似其梯度，让梯度得以“直通”</p>
+</blockquote>
+<p><strong>优点</strong>:</p>
+<ul>
+<li><strong>精度更高</strong>: 因为模型是“带着镣铐跳舞”，主动学习如何最小化量化误差，所以QAT最终得到的模型精度通常显著高于PTQ，是追求极致模型性能的“王牌方案”。</li>
+</ul>
+<p><strong>缺点</strong>:</p>
+<ul>
+<li><strong>成本极其高昂</strong>: 它需要进行完整的模型训练或微调，对计算资源（大量高端GPU、长时间训练）和数据的要求与训练一个大模型无异，成本高到几乎让所有大型LLM望而却步。</li>
+</ul>
+<h4 id="6-1-3-总结与选择建议"><a href="#6-1-3-总结与选择建议" class="headerlink" title="6.1.3 总结与选择建议"></a>6.1.3 总结与选择建议</h4><p>我们可以用下面这张图和表格，来清晰地对比二者的差异。</p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>训练后量化 (PTQ)</th>
+<th>量化感知训练 (QAT)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>执行时机</td>
+<td>模型训练完成之后</td>
+<td>模型训练或微调之中</td>
+</tr>
+<tr>
+<td>成本开销</td>
+<td>低，快速便捷</td>
+<td>极高，需要大量算力和时间</td>
+</tr>
+<tr>
+<td>数据需求</td>
+<td>少量校准数据</td>
+<td>大量训练数据</td>
+</tr>
+<tr>
+<td>模型精度</td>
+<td>相对较低（尤其在超低比特下）</td>
+<td>相对更高</td>
+</tr>
+<tr>
+<td>主流应用</td>
+<td>大语言模型（LLM）、快速部署场景</td>
+<td>对精度有极致要求的模型（如CV领域）</td>
+</tr>
+</tbody></table>
+<p><strong>结论非常明确</strong>：对于动辄千亿参数的大语言模型，<strong>PTQ以其无与伦比的低成本和便捷性，成为了当下绝对的主流和唯一切实可行的选择</strong>。而QAT则作为一种“高精度武器”，保留在那些资源允许、且对模型精度要求严苛的特定场景中使用。</p>
+<h3 id="6-2-激活值量化策略：静态-vs-动态"><a href="#6-2-激活值量化策略：静态-vs-动态" class="headerlink" title="6.2 激活值量化策略：静态 vs. 动态"></a>6.2 激活值量化策略：静态 vs. 动态</h3><p>在PTQ（训练后量化）的路径上，处理权重通常是直接了当的，因为它们是静态的。真正的挑战和决策点在于如何处理<strong>激活值</strong>——这些在网络中流动、随输入而变的动态数据。针对激活值的量化，主要有两种截然不同的策略：<strong>静态量化</strong>和<strong>动态量化</strong>。</p>
+<h4 id="6-2-1-静态量化-Static-Quantization-“未卜先知”，追求极致速度"><a href="#6-2-1-静态量化-Static-Quantization-“未卜先知”，追求极致速度" class="headerlink" title="6.2.1 静态量化 (Static Quantization) - “未卜先知”，追求极致速度"></a>6.2.1 <strong>静态量化 (Static Quantization) - “未卜先知”，追求极致速度</strong></h4><p>静态量化是一种“预先准备，快速通过”的策略。它的核心思想是在模型正式部署之前，就“预测”并<strong>固定</strong>下激活值的量化参数。</p>
+<p><strong>工作流程</strong>: 正如我们在前面所详述的，静态量化强依赖于<strong>校准数据集</strong>。它通过让一小部分有代表性的数据“预先”流过模型，来窥探并统计出每一层激活值的“典型”数值范围。基于这个统计结果，它会为每一层的激活值计算出一套<strong>固定不变</strong>的缩放因子s和零点z。这套参数随后会被永久地保存在量化模型中。</p>
+<p><strong>优点</strong>:</p>
+<ul>
+<li><strong>极致的推理性能</strong>: 这是静态量化最大的优势。因为所有的量化参数都是预先计算好的，所以在真正推理时，硬件无需进行任何额外的计算，可以直接执行量化和矩阵乘法。这使得静态量化方案的<strong>延迟最低、资源效率最高</strong>，特别适合于对响应速度有严苛要求的服务器部署和边缘计算场景。</li>
+</ul>
+<p><strong>缺点</strong>:</p>
+<ul>
+<li><strong>精度依赖于校准</strong>: 它的成败完全系于校准数据集的“质量”。如果未来真实的输入数据分布与校准集大相径庭，那么预先算好的那套固定的s和z就会变得不合时宜，从而可能导致较为明显的精度下降。</li>
+</ul>
+<h4 id="6-2-2-动态量化-Dynamic-Quantization-“相机行事”，追求更高精度"><a href="#6-2-2-动态量化-Dynamic-Quantization-“相机行事”，追求更高精度" class="headerlink" title="6.2.2 动态量化 (Dynamic Quantization) - “相机行事”，追求更高精度"></a>6.2.2 <strong>动态量化 (Dynamic Quantization) - “相机行事”，追求更高精度</strong></h4><p>动态量化则采取了一种完全相反的、更加灵活的“实时决策”策略。</p>
+<p><strong>工作流程</strong>: 动态量化<strong>完全不需要校准数据集</strong>。它选择在<strong>每一次</strong>前向传播（即每次推理）的过程中，“实时地”分析当前输入所产生的激活值。具体来说，对于每一层的激活值张量，它都会在运行时动态地计算出其当前的最大值max和最小值min，并基于这个实时的范围，即时地计算出本次推理所用的s和z。</p>
+<p><strong>优点</strong>:</p>
+<ul>
+<li><strong>通常精度更高</strong>: 由于量化参数是为每一次输入“量身定制”的，它能完美地适配当前激活值的动态范围，因此通常能达到比静态量化更高的精度。这在输入数据分布变化非常剧烈的场景中尤其有优势。</li>
+<li><strong>部署简单</strong>: 省去了准备和管理校准数据集的步骤。</li>
+</ul>
+<p><strong>缺点</strong>:</p>
+<ul>
+<li><strong>引入运行时开销</strong>: 这是动态量化最主要的代价。每一次推理都需要额外执行一次（或多次）在激活值上计算最大&#x2F;最小值的操作，这个<strong>额外的计算开销会直接增加推理的延迟</strong>。因此，它的运行速度通常慢于静态量化。</li>
+<li><strong>硬件支持受限</strong>: 并非所有的AI加速硬件都对这种运行时的动态计算提供了良好的优化支持。</li>
+</ul>
+<h4 id="6-2-3-总结与选择建议"><a href="#6-2-3-总结与选择建议" class="headerlink" title="6.2.3 总结与选择建议"></a>6.2.3 <strong>总结与选择建议</strong></h4><p>我们可以用一个简单的表格来总结二者的核心区别：</p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>静态量化 (Static)</th>
+<th>动态量化 (Dynamic)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>参数计算时机</td>
+<td>推理前（Offline），一次性计算并固定</td>
+<td>推理时（Online），每次都实时计算</td>
+</tr>
+<tr>
+<td>校准数据</td>
+<td>需要</td>
+<td>不需要</td>
+</tr>
+<tr>
+<td>推理速度</td>
+<td>快，无额外开销</td>
+<td>相对较慢，有运行时计算开销</td>
+</tr>
+<tr>
+<td>模型精度</td>
+<td>依赖校准，可能较低</td>
+<td>通常更高，适应性强</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>延迟敏感、服务器部署、边缘计算</td>
+<td>输入分布变化大、对精度要求极高的场景</td>
+</tr>
+</tbody></table>
+<p><strong>选择建议</strong>: 在绝大多数追求高吞吐、低延迟的生产环境中，<strong>静态量化</strong>因其卓越的性能而成为首选方案。<strong>动态量化</strong>则作为一种有力的补充，在那些可以容忍一定延迟来换取更高精度的特定任务中发挥其价值。</p>
+<h2 id="7-量化最大的挑战：神秘的“异常值”（Outliers）"><a href="#7-量化最大的挑战：神秘的“异常值”（Outliers）" class="headerlink" title="7 量化最大的挑战：神秘的“异常值”（Outliers）"></a>7 量化最大的挑战：神秘的“异常值”（Outliers）</h2><p>经过前面的铺垫，我们似乎已经掌握了一套完整的量化“兵法”：从数据类型到量化公式，从宏观策略到微观粒度。看起来，只要按部就班，就能成功地为任何大模型“瘦身”。然而，如果事情这么简单，量化就不会至今仍是学术界和工业界的研究热点。</p>
+<p>实践中，当我们把这些经典理论直接应用于现代的大语言模型（LLM）时，往往会发现模型性能出现了灾难性的下降。这一切的背后，都指向了同一个“幕后黑手”——<strong>异常值（Outliers）</strong>。可以说，与异常值的斗争，构成了整个高级量化技术的主旋律。</p>
+<h3 id="7-1-什么是异常值？为何它会“绑架”量化过程？"><a href="#7-1-什么是异常值？为何它会“绑架”量化过程？" class="headerlink" title="7.1 什么是异常值？为何它会“绑架”量化过程？"></a>7.1 什么是异常值？为何它会“绑架”量化过程？</h3><p><strong>异常值的“庐山真面目”</strong></p>
+<p>首先，我们来给异常值画个像。在LLM的权重或激活值张量中，<strong>异常值指的是那些其数值的绝对值，远大于绝大多数其他数值的“极端分子”</strong>。</p>
+<p>上面是一个outlier示例（一共有4个黄色的outliear feature），横轴是hidden_dim维度，纵轴是sequence维度。上图中seq_len &#x3D; 3，所以一个outlier feature是一个3×1的向量。这些异常值并非随机的噪声，而是在大模型中系统性出现的一种现象。它们虽然数量占比极少，但其巨大的数值，却足以“绑架”整个量化过程。</p>
+<p>异常值究竟是如何破坏我们精心设计的量化流程的呢？问题就出在计算<strong>缩放因子s</strong>的环节上。</p>
+<p>回忆一下，我们的缩放因子s（或Δ）是由待量化范围的最大值 $r_{max}$ 和最小值 $r_{min}$ 决定的。当一个张量中存在异常值时，这个 $r_{max}$（或 $r_{min}$ ）就不再由占99.9%的“正常值”决定，而是被那0.1%的“极端分子”完全掌控了。</p>
+<p>下面这张图生动地说明了这个问题：</p>
+<p><img src="/images/quantization/smoothquant_1.png" alt="smoothquant_1"></p>
+<blockquote>
+<p>图片来源：论文SmoothQuant: Accurate and Efficient Post-Training Quantization for Large Language Models</p>
+</blockquote>
+<p>左侧，代表激活值分布的红色曲线中，那个高耸的尖峰就是一个异常值。为了容纳这个尖峰，整个量化范围被极大地拉伸，导致下方那些平缓的“正常值”几乎分不到任何有效的量化级别（low effective bits），因此变得“难以量化”。而右侧平滑的权重分布则没有这个问题上图。</p>
+<p>让我们通过一个具体的数值例子来感受一下这种“绑架”的威力：</p>
+<blockquote>
+<p>假设我们有一个激活值向量 <code>A = [-0.10, -0.23, 0.08, -0.38, -0.28, -0.29, -2.11, 0.34, -0.53, -67.0]</code>。</p>
+</blockquote>
+<p><strong>情况一：带着异常值进行量化</strong></p>
+<ul>
+<li>由于存在<code>-67.0</code> 这个巨大的异常值，MinMax量化会将范围定为<code>[-67.0, 0.34]</code>。</li>
+<li>计算出的缩放因子s会非常大。</li>
+<li>量化再反量化后，向量A可能会变成：<code>[-0.00, -0.00, 0.00, -0.53, -0.53, -0.53, -2.11, 0.53, -0.53, -67.00]</code>。</li>
+<li><strong>结果是灾难性的</strong>：除了最大的几个值，其他大部分数值的精度信息几乎被完全抹除，全都变成了<code>0.00</code>或<code>-0.53</code>。</li>
+</ul>
+<p><strong>情况二：如果移除异常值</strong></p>
+<ul>
+<li>假设我们神奇地移除了<code>-67.0</code>，现在只对剩下的值进行量化，范围是<code>[-2.11, 0.34]</code>。</li>
+<li>量化再反量化后，向量可能会变成：<code>[-0.10, -0.23, 0.08, -0.38, -0.28, -0.28, -2.11, 0.33, -0.53]</code>。</li>
+<li><strong>结果非常理想</strong>：几乎所有的原始信息都得到了完美的保留。</li>
+</ul>
+<p>这个例子有力地证明了，异常值就像一颗“老鼠屎”，它以一己之力，就能“坏了一锅汤”，让整个量化过程失去意义。</p>
+<p><strong>总结</strong>：异常值是LLM量化中的核心挑战。它通过极大地拉伸量化范围，严重“稀释”了正常值的量化精度，是导致量化后模型性能下降的罪魁祸首。那么，这些神秘的异常值从何而来？我们又能否简单地将它们剔除呢？下一小节，我们将深入探讨这些问题。</p>
+<h3 id="7-2-异常值的“涌现”：大模型的“成年礼”"><a href="#7-2-异常值的“涌现”：大模型的“成年礼”" class="headerlink" title="7.2 异常值的“涌现”：大模型的“成年礼”"></a>7.2 异常值的“涌现”：大模型的“成年礼”</h3><p>在上一节，我们认识了异常值这个量化过程中的“头号公敌”。一个自然的问题是：这些“极端分子”是从哪里来的？它们是模型训练中的偶然错误，还是另有玄机？</p>
+<p>答案可能出乎意料：<strong>异常值的出现，并非偶然，而是在大模型规模增长到一定程度后，一种系统性的、必然的“涌现”（Emergence）现象</strong>。它就像是LLM从一个“少年”成长为“青年”时，必然经历的一场“成年礼”——伴随着能力的觉醒，也带来了新的、更复杂的特征。</p>
+<p>“LLM.int8()”的作者将这种现象称为**“涌现特征”（Emergent Features）**。它描述了异常值并非一蹴而就，而是随着模型规模的扩大，其数值、数量以及受影响的层和Token比例都在逐渐增长，最终在某个临界点发生“相变”（Phase Shift），全面爆发。</p>
+<h4 id="7-2-1-“涌现”的轨迹：从零星出现到全面爆发"><a href="#7-2-1-“涌现”的轨迹：从零星出现到全面爆发" class="headerlink" title="7.2.1 “涌现”的轨迹：从零星出现到全面爆发"></a>7.2.1 <strong>“涌现”的轨迹：从零星出现到全面爆发</strong></h4><p>研究人员通过对不同规模Transformer模型的细致观察，描绘出了异常值“涌现”的清晰轨迹：</p>
+<ol>
+<li><strong>小型模型（如125M）</strong>: 在这个阶段，异常值如同“星星之火”，它们是<strong>概率性</strong>的，只在少数情况下、零星地出现在模型的某些特定部分，例如自注意力机制的投影层输出中。</li>
+<li><strong>中型模型（如350M ~ 1.3B）</strong>: “火势”开始蔓延。异常值开始更稳定地出现在注意力和前馈网络（FFN）的输出中，并且开始呈现出某种规律性，例如在不同层级的同一特征维度上出现，暗示着模型内部可能正在形成某种跨层协作。</li>
+<li><strong>大型模型（如2.7B ~ 6B）</strong>: 异常值变得<strong>系统性</strong>。在超过60%的模型层中，它们都会稳定地出现在相同的特征维度上，仿佛已经成为了模型处理信息的一种固有模式。</li>
+</ol>
+<p>在了解了异常值对量化过程的“绑架”之后，我们自然会问：这种现象有多普遍？它是如何产生的？研究人员通过对不同规模Transformer模型的细致观察，发现了一个惊人的规律：异常值的出现并非线性递增，而是在某个关键节点上，会发生一次剧烈的**“相变”（Phase Shift）**。</p>
+<p>整个“涌现”过程中，最激动人心的时刻发生在大模型跨越<strong>60亿到67亿参数</strong>这个门槛时。</p>
+<p><img src="/images/quantization/llm.int8()_1.png" alt="llm.int8()_1"></p>
+<blockquote>
+<p>图片来源：论文LLM.int8(): 8-bit Matrix Multiplication  for Transformers at Scale</p>
+</blockquote>
+<p>图(a)<strong>横轴</strong>代表模型的<strong>参数量</strong>（单位：十亿）。 </p>
+<p><strong>纵轴</strong>代表模型中有多少百分比的<strong>层（layers）<strong>或</strong>Token</strong>受到了异常值的影响。 </p>
+<p><strong>观察曲线</strong>: 在模型规模小于60亿参数时，您可以看到两条曲线（蓝色代表层，黄色代表Token）虽然在增长，但趋势相对平缓。然而，当模型规模跨越图中虚线标记的<strong>60亿到67亿参数</strong>这个狭窄的区间时，一场剧变发生了。两条曲线的斜率突然变得异常陡峭，呈现出非线性的、爆炸性的增长。</p>
+<p>这次“相变”带来了两个直接且严重后果：</p>
+<ol>
+<li><strong>全局化现象</strong>: 正如上图所示，在跨越这个临界点后，受异常值影响的<strong>模型层</strong>比例从约65%猛增至<strong>100%</strong>，而受影响的<strong>Token</strong>比例也从约35%跃升至<strong>75%</strong>。这意味着，异常值不再是模型的局部特征，而是瞬间演变成了一个遍布模型每一个角落的全局现象。</li>
+<li><strong>朴素量化的失效</strong>: 也正是在这个“相变点”之后，所有我们之前讨论的、没有特殊处理机制的简单量化方法开始<strong>彻底失效</strong>。因为异常值的全面爆发导致量化的动态范围被极度拉伸，使得占绝对多数的“正常”数值在量化后其精度信息被完全“清零”，最终导致量化后的模型几乎丢失了所有有效信息，性能雪崩。</li>
+</ol>
+<h4 id="7-2-2-不仅关乎大小，更关乎“智慧”"><a href="#7-2-2-不仅关乎大小，更关乎“智慧”" class="headerlink" title="7.2.2 不仅关乎大小，更关乎“智慧”"></a>7.2.2 不仅关乎大小，更关乎“智慧”</h4><p>更有趣的发现是，异常值的涌现并不仅仅和模型的参数“大小”挂钩，它还和模型的“智慧”程度——即<strong>性能</strong>密切相关。</p>
+<p>图(b)<strong>横轴</strong>这次变为了模型的<strong>C4困惑度（Perplexity）</strong>，这是一个衡量语言模型性能的核心指标，其<strong>数值越低，代表模型性能越好，模型越“聪明”</strong>。 </p>
+<p><strong>观察曲线</strong>: 从图中我们可以清晰地看到，随着模型性能的提升（困惑度从左到右逐渐<strong>降低</strong>），受异常值影响的层和Token的比例也呈现出平滑的<strong>指数级增长</strong>。</p>
+<p>这揭示了一个深刻的结论：<strong>异常值并非模型的“缺陷”或“bug”，而是模型在学习和成长的过程中，为了获得更强能力而自发演化出的一种内在属性</strong>。模型越强大、越“聪明”，其内部的数值分布就越“极端”，异常值现象就越显著。</p>
+<h4 id="7-2-3-“成年”的烦恼与机遇"><a href="#7-2-3-“成年”的烦恼与机遇" class="headerlink" title="7.2.3 “成年”的烦恼与机遇"></a>7.2.3 “成年”的烦恼与机遇</h4><p>异常值的“涌现”是大语言模型发展过程中的一种基础性、规律性的现象。它是一把双刃剑： </p>
+<p><strong>一方面</strong>，它是模型能力不断增强、智能水平不断提升、走向“成熟”的标志。 </p>
+<p><strong>另一方面</strong>，它也为我们进行模型量化设置了巨大的障碍，是所有量化误差的根源。</p>
+<p>那么，这些对模型能力至关重要的异常值，我们到底该如何看待？是该不顾一切地保留，还是想方设法地抑制？</p>
+<h3 id="7-3-异常值的双面性：既是“麻烦制造者”，也是“性能守护神”"><a href="#7-3-异常值的双面性：既是“麻烦制造者”，也是“性能守护神”" class="headerlink" title="7.3 异常值的双面性：既是“麻烦制造者”，也是“性能守护神”"></a>7.3 异常值的双面性：既是“麻烦制造者”，也是“性能守护神”</h3><p>通过前面的分析，我们知道异常值是量化过程中的“天灾”。一个自然而然的想法便是：既然这些“极端分子”如此碍事，我们能不能在量化前直接将它们“干掉”（例如，通过裁剪或设为0）呢？</p>
+<p>答案是：<strong>绝对不能</strong>。</p>
+<p>这正是LLM量化中最具戏剧性的核心矛盾：异常值一方面是破坏量化精度的“麻烦制造者”，另一方面，它又是支撑模型强大能力的“性能守护神”。它是一把锋利无比的双刃剑。</p>
+<h4 id="7-3-1-一面：“麻烦制造者”-量化精度的“毁灭者”"><a href="#7-3-1-一面：“麻烦制造者”-量化精度的“毁灭者”" class="headerlink" title="7.3.1 一面：“麻烦制造者” - 量化精度的“毁灭者”"></a>7.3.1 <strong>一面：“麻烦制造者” - 量化精度的“毁灭者”</strong></h4><p>这一点我们已在前面详细讨论过。我们再简单回顾一下它的“罪状”：</p>
+<ol>
+<li><strong>“绑架”量化范围</strong>: 异常值的巨大数值会极大地拉伸量化范围（），导致计算出的缩放因子s过大。</li>
+<li><strong>“稀释”有效精度</strong>: 过大的缩放因子s会使得绝大多数“正常”数值在量化后被映射到极少数的几个整数上，甚至直接被“清零”，从而丢失了大量宝贵的细节信息。</li>
+<li><strong>拖慢特定算法速度</strong>: 对于一些需要对异常值进行特殊处理的高级量化算法（如SpQR），保留这些稀疏的异常值需要走一个特殊的、更慢的计算通路，反而可能会导致整体推理速度下降。</li>
+</ol>
+<h4 id="7-3-2-另一面：“性能守护神”-模型能力的关键支柱"><a href="#7-3-2-另一面：“性能守护神”-模型能力的关键支柱" class="headerlink" title="7.3.2 另一面：“性能守护神” - 模型能力的关键支柱"></a>7.3.2 另一面：“性能守护神” - 模型能力的关键支柱</h4><p>尽管异常值给量化带来了天大的麻烦，但大量的研究和实验都指向了一个惊人但明确的结论：<strong>保留这些异常值，对于维持大语言模型的性能至关重要</strong>。它们不是可以随意丢弃的噪声，而是模型能力的关键组成部分。</p>
+<ul>
+<li><strong>对模型预测能力的致命影响</strong> 实验证明，如果粗暴地移除异常值，哪怕只是移除极少数几个特征维度，也会导致模型性能的“雪崩”。<br>一项研究发现，对于一个大型Transformer模型，如果将包含异常值的7个特征维度移除，模型的<strong>Top-1预测概率会直接从约40%腰斩至约20%</strong>，而衡量模型性能的<strong>困惑度（Perplexity）指标会暴增600-1000%</strong>！相比之下，如果随机移除7个不包含异常值的特征维度，模型的性能几乎不受任何影响。</li>
+</ul>
+<p>下面这张图生动地展示了移除一个“超级权重”（一种关键的权重异常值）后的灾难性后果：</p>
+<p><img src="/Users/xufeng/note/images/quantization/super_weight.png" alt="super_weight"></p>
+<blockquote>
+<p>图片来源：论文 The super weight in large language models</p>
+<p>在包含超级权重时，模型能流畅地回答问题；而移除后，模型直接开始“胡言乱语”， 输出毫无意义的乱码</p>
+</blockquote>
+<p><strong>模型理解“上下文”的关键</strong> 更深入的研究揭示了异常值在模型认知功能中所扮演的核心角色。我们需要区分模型的两种知识：</p>
+<ul>
+<li><strong>参数化知识 (Parametric Knowledge)</strong>: 指模型在训练中背下来的、固化在权重里的“死记硬背”的知识。例如，“法国的首都是巴黎”。</li>
+<li><strong>上下文知识 (Contextual Knowledge)</strong>: 指模型根据当前<strong>输入</strong>（Prompt）进行推理、理解和生成新信息的能力。例如，阅读一篇长文后进行总结。</li>
+</ul>
+<p>研究表明，<strong>异常值正是模型处理和理解“上下文知识”的关键机制</strong>。<br>实验发现，如果破坏掉模型中的异常值，模型回答“中国首都是哪里”这类参数化知识问题的能力不受影响，但其在需要依赖上下文进行数学推理（如GSM8K测试）或逻辑分析的任务上，表现会<strong>断崖式下滑</strong>。<br>更有趣的是，当给模型一个与事实冲突的上下文（例如，“请注意，知识已更新，纽约现在是英国的城市”），正常模型会陷入困惑。但破坏掉异常值后，模型反而能更坚定地忽略这个错误的上下文，并回答出“纽约是美国的城市”。这恰恰证明了，<strong>异常值是引导模型关注和信任当前输入上下文的“开关”</strong>。关闭了这个开关，模型就只会依赖自己背过的“死知识”了。</p>
+<h4 id="7-3-3-核心矛盾与量化算法的使命"><a href="#7-3-3-核心矛盾与量化算法的使命" class="headerlink" title="7.3.3 核心矛盾与量化算法的使命"></a><strong>7.3.3 核心矛盾与量化算法的使命</strong></h4><p>至此，LLM量化的核心矛盾已经完全暴露在我们面前：</p>
+<blockquote>
+<p>我们面对的是一些对于<strong>量化过程极其有害</strong>，但对于<strong>模型性能又极其重要</strong>的数值。我们既不能容忍它们破坏量化精度，又不能粗暴地将它们移除。</p>
+</blockquote>
+<p>如何解决这个两难的困境？这正是所有高级量化算法的终极使命。所有后续我们将要讨论的算法，如<strong>LLM.int8()</strong>、<strong>SmoothQuant</strong>、<strong>AWQ</strong>等，它们所有的精妙设计，归根结底都是为了回答同一个问题。</p>
+<h3 id="7-4-异常值的分类：普通异常值与“核弹级”的巨大异常值"><a href="#7-4-异常值的分类：普通异常值与“核弹级”的巨大异常值" class="headerlink" title="7.4 异常值的分类：普通异常值与“核弹级”的巨大异常值"></a>7.4 异常值的分类：普通异常值与“核弹级”的巨大异常值</h3><p>在我们深入探讨了异常值的“双面性”之后，研究者们进一步发现，并非所有的异常值都是“生而平等”的。为了更精确地设计量化策略，我们需要学会区分它们。根据其分布模式和极端程度，我们可以将激活值中的异常值大致分为两类：分布更广的**“普通异常值”<strong>和极其稀疏但数值更夸张的</strong>“巨大异常值”**。</p>
+<h4 id="7-4-1-普通异常值-Normal-Outliers-“通道”的“常客”"><a href="#7-4-1-普通异常值-Normal-Outliers-“通道”的“常客”" class="headerlink" title="7.4.1 普通异常值 (Normal Outliers) - “通道”的“常客”"></a>7.4.1 普通异常值 (Normal Outliers) - “通道”的“常客”</h4><p>这是我们早期认知中对异常值的主要印象，它的核心特点是与**“通道”（Channel）**强相关。</p>
+<p><strong>核心特征</strong>:</p>
+<ol>
+<li><strong>通道相关性</strong>: 普通异常值往往稳定地出现在**特定的几个特征维度（通道）**中。如果把一个激活值张量看作一张表格，那么这些异常值总是集中在固定的那几列。</li>
+<li><strong>Token普遍性</strong>: 在这些特定的“异常通道”里，**几乎每一个Token（每一行）**都会呈现出较大的数值。</li>
+</ol>
+<p><strong>挑战与对策</strong>: 这种“通道级”的异常值，正是我们之前讨论的，导致“逐张量”量化失效的元凶。因为它的存在，使得不同通道间的数值范围差异巨大。应对它的主要武器，就是我们已经介绍过的**逐通道（Per-Channel）<strong>或</strong>逐组（Per-Group）**量化。通过为每个通道或每个组计算独立的量化参数，就可以有效地将这些“常客”异常值的影响隔离在它们自己的通道内。</p>
+<h4 id="7-4-2-巨大异常值-Massive-Outliers-“Token”的“天选之子”"><a href="#7-4-2-巨大异常值-Massive-Outliers-“Token”的“天选之子”" class="headerlink" title="7.4.2 巨大异常值 (Massive Outliers) - “Token”的“天选之子”"></a>7.4.2 巨大异常值 (Massive Outliers) - “Token”的“天选之子”</h4><p>随着研究的深入，人们发现了一种更极端、更神秘的异常值，它的特点是与**“Token”**强相关。</p>
+<p><strong>核心特征</strong>:</p>
+<ol>
+<li><strong>Token相关性</strong>: 与普通异常值不同，巨大异常值仅仅出现在<strong>极其稀疏、数量极少的特定Token</strong>上。</li>
+<li><strong>极端数值</strong>: 它们的数值大到夸张，论文中给出的一个定量定义是：<strong>幅值超过100，并且至少是其所在隐藏状态中值幅度的1000倍</strong>。</li>
+<li><strong>出现位置</strong>: 它们常常出现在一些结构性的、有特殊功能的Token上，例如<strong>句首的起始Token <code>[BOS]</code>、标点符号（如<code>.</code>、<code>\n</code>）或某些高频功能词（如“and”、“of”）</strong>。</li>
+</ol>
+<p><img src="/Users/xufeng/note/images/quantization/massive_activations.png" alt="massive_activations"></p>
+<blockquote>
+<p> 图片来源：论文 Massive Activations in Large Language Models</p>
+</blockquote>
+<p>上图展示了巨大异常值的出现模式。无论输入什么句子，在LLaMA2和Mixtral模型中，巨大的激活尖峰总是稳定地出现在固定的几个特征维度，并且只与序列开头的第一个Token相关</p>
+<p><strong>更深层的作用：充当“偏置项”</strong></p>
+<p>研究表明，这些巨大异常值在模型中扮演着一个非常特殊的角色——<strong>一个固定的、但至关重要的偏置项（Bias）</strong>。它们就像模型内置的“全局参数”，通过在注意力机制中吸引大量关注，来为所有其他Token的计算提供一个恒定的基准或偏移。</p>
+<p><img src="/Users/xufeng/note/images/quantization/massive_activatioins_1.png" alt="massive_activatioins_1"></p>
+<blockquote>
+<p>图片来源：论文 Massive Activations in Large Language Models</p>
+</blockquote>
+<p>上图的文字结论一针见血地指出了巨大激活值的本质作用</p>
+<p><strong>挑战与对策</strong>: 这种“Token级”的巨大异常值，是连“逐通道”量化都难以处理的“硬骨头”。因为它是在某个特定Token上“平地起高楼”，使得该Token的数值范围与其他所有Token完全不同。常规的量化策略很难在不产生巨大误差的情况下处理它，因此催生了更具创新性的解决方案，例如我们将在后续系列文章中探讨的<strong>旋转矩阵法</strong>或<strong>基于Attention Sink的前缀量化法</strong>等。</p>
+<h4 id="7-4-3-图解对比：一目了然的区别"><a href="#7-4-3-图解对比：一目了然的区别" class="headerlink" title="7.4.3 图解对比：一目了然的区别"></a>7.4.3 图解对比：一目了然的区别</h4><p>下面这张图堪称总结这两种异常值区别的“神图”：</p>
+<p><img src="/images/quantization/duquant.png"></p>
+<blockquote>
+<p>图片来源：论文 DuQuant: Distributing Outliers via Dual Transformation Makes Stronger Quantized LLMs</p>
+</blockquote>
+<ul>
+<li><strong>左图 (a) Normal Outliers</strong>: 可以看到，红色的“山脉”（异常值）虽然高耸，但它<strong>横跨了整个Token维度</strong>，即在每个Token上都存在，但集中在某些特定的Channel维度。</li>
+<li><strong>右图 (b) Massive Outliers</strong>: 您可以看到，整个平面上只有一个**“定海神针”般的红色尖峰**，它只存在于<strong>极少数的Token维度</strong>上，但在数值（Y轴）上远超左图的异常值。</li>
+</ul>
+<p><strong>总结</strong>: 对异常值进行分类，是高级量化算法设计的基石。<strong>普通异常值</strong>是一个“通道级”的校准问题，可以通过更精细的量化粒度（如Per-Channel）来解决。而<strong>巨大异常值</strong>则是一个更深层次的“Token级”结构性问题，它的存在，直接推动了量化技术从“优化”走向“重构”，催生了众多前沿的、更具创造性的量化思想。</p>
+<h3 id="7-5-追根溯源：异常值在Transformer中的“诞生之旅”"><a href="#7-5-追根溯源：异常值在Transformer中的“诞生之旅”" class="headerlink" title="7.5 追根溯源：异常值在Transformer中的“诞生之旅”"></a>7.5 追根溯源：异常值在Transformer中的“诞生之旅”</h3><p>为了真正地“降服”异常值，我们必须成为一名“侦探”，追溯它的源头，理解它在Transformer这个复杂精密的“城市”中，是如何从一个无害的“市民”一步步演变成一个“极端分子”的。研究表明，异常值的诞生并非源于单一环节的“bug”，而是Transformer架构中多个核心模块环环相扣、协同作用下的系统性产物。</p>
+<p>本节，我们将开启这次“溯源之旅”，首先来到它的第一个“诞生地”。</p>
+<h4 id="7-5-1-起点：Softmax的“赢家通吃”困境"><a href="#7-5-1-起点：Softmax的“赢家通吃”困境" class="headerlink" title="7.5.1 起点：Softmax的“赢家通吃”困境"></a>7.5.1 起点：Softmax的“赢家通吃”困境</h4><p>异常值的第一个“火花”，往往源于自注意力机制（Self-Attention）中那个我们再熟悉不过的<strong>Softmax</strong>函数。</p>
+<ul>
+<li><strong>源起：“什么都不做”的特殊需求</strong> 在复杂的语言任务中，一个注意力头（Attention Head）有时需要学会一项特殊的技能——<strong>“什么都不做” (no-op)</strong>。这意味着，对于当前正在处理的这个Token，它认为没有任何其他Token值得去关注，也不想用任何其他Token的信息来更新自己。<br>但注意力机制的设计，要求它必须“关注”点什么（因为Softmax的输出概率之和必须为1）。模型为了实现这种“什么都不做”的效果，便演化出一种聪明的策略：将几乎全部的注意力权重（例如99.99%），都集中到一些<strong>没有实际语义、安全无害的Token</strong>上，比如句号<code>.</code>、逗号<code>,</code>或者特殊的<strong>分隔符<code>[SEP]</code></strong>。通过“假装”高度关注这些无意义的符号，注意力头就巧妙地实现了对所有有意义信息的“无视”。</li>
+</ul>
+<p><img src="/images/quantization/quantizable_transformers.png" alt="quantizable_transformers"></p>
+<blockquote>
+<p>图片来源：论文Quantizable Transformers: Removing Outliers by Helping Attention Heads Do Nothing</p>
+</blockquote>
+<p>上图的热力图就清晰地展示了这种现象：在(a), (b), (c)三种不同情况下，注意力权重（左侧灰度图）都高度集中在了<code>[SEP]</code>这个Token上，而几乎忽略了句子中其他所有真实的词语</p>
+<p><strong>困境：Softmax的数学天性</strong></p>
+<p>这种“赢家通吃”的注意力分布，给Softmax函数带来了一个巨大的数学难题。Softmax的计算公式是 $y_i &#x3D; \dfrac{e^{x_i}}{\sum_je^{x_j}}$</p>
+<p>$$softmax(x)_i &#x3D; 0 ⇔ ∃j≠i, x_j - x_i &#x3D; +∞$$</p>
+<p>上面这个数学性质告诉我们一个残酷的事实：<br>要想让一个Token的注意力权重 $y_i$ <strong>趋近于0</strong>，它的输入Logit值 $x_i$ 就必须比另一个Token的Logit值 $x_j$ <strong>小得不成比例</strong>——理论上需要小无穷多。反之，要想让某个Token（比如<code>[SEP]</code>）的注意力权重<strong>趋近于1</strong>，它的Logit值 $x_i$ 就必须比其他所有Token的Logit值<strong>大得不成比例</strong>——理论上需要大无穷多。<br>这种数学上的要求，<strong>迫使</strong>模型必须在送入Softmax之前，生成具有<strong>巨大动态范围</strong>的Logit值。这，就是<strong>异常值最初的“火花”</strong>。</p>
+<p><strong>根源：前一层的FFN</strong>。 那么，这个巨大的Logit值又是从哪来的呢？它来自于计算Query和Key向量的线性层。而这些线性层的输入，又恰恰来自于<strong>前一个Transformer模块的输出</strong>，特别是其中的**前馈网络（FFN）**部分。</p>
+<p><img src="/images/quantization/quantizable_transformers_1.png" alt="quantizable_transformers_1"></p>
+<p>上图清晰地指出了这个“作案链条”：前一层（previous layer）的FFN部分是产生“最大异常值”（biggest outliers）的源头，这些异常值随后通过残差连接，被送入下一层（next layer）的注意力机制中，成为了制造巨大Logit差异的“原材料”</p>
+<p>更有甚者，由于注意力计算前通常还有一个<strong>LayerNorm</strong>层，它会试图将数值归一化。为了“抵抗”这种归一化效应，并依然能在Softmax中制造出足够的差异，前一层FFN就必须输出一个<strong>更加巨大</strong>的异常值，才能保证在被LayerNorm“削弱”之后，依然“火力”充足。</p>
+<p>至此，异常值的“诞生之旅”第一站已经清晰：<strong>注意力机制的功能需求</strong>与<strong>Softmax函数的数学天性</strong>一拍即合，共同催生了对极端数值的强烈需求，这个需求信号被传递给了前一层的FFN，点燃了异常值诞生的星星之火。</p>
+<h4 id="7-5-2-“催化剂”之一：RoPE的位置编码"><a href="#7-5-2-“催化剂”之一：RoPE的位置编码" class="headerlink" title="7.5.2 “催化剂”之一：RoPE的位置编码"></a>7.5.2 “催化剂”之一：RoPE的位置编码</h4><p>如果说Softmax的需求点燃了异常值的“火花”，那么**旋转位置编码（Rotary Position Embedding, RoPE）<strong>则像是一个关键的“催化剂”，它为异常值的形成提供了“结构蓝图”，尤其是在自注意力机制的</strong>查询（Query, Q）<strong>和</strong>键（Key, K）**矩阵中。</p>
+<p><strong>核心现象：RoPE模型的“特有病”</strong> 研究人员发现了一个非常有趣的现象：</p>
+<ol>
+<li>在使用<strong>RoPE</strong>作为位置编码方案的模型（如Llama、Gemma、Qwen系列）中，其Q和K矩阵内普遍存在着显著的、大规模的结构化异常值。</li>
+<li>而在那些<strong>不使用RoPE</strong>，采用其他位置编码方案的模型（如GPT-2、OPT）中，则<strong>观察不到</strong>这种现象。</li>
+</ol>
+<p>这个强烈的相关性暗示，RoPE机制本身与这些结构化异常值的出现有着密不可分的关系。</p>
+<p><strong>深层机制：被“征用”的低频维度</strong> RoPE的本职工作是通过“旋转”向量的不同部分来注入相对位置信息。它会对嵌入向量中的不同维度应用不同频率的旋转：</p>
+<ul>
+<li><strong>高频维度</strong>: 旋转快，对短距离位置敏感。</li>
+<li><strong>低频维度</strong>: 旋转慢，对长距离位置关系敏感。</li>
+</ul>
+<p>关键在于，研究表明，模型似乎“征用”了这些旋转缓慢的<strong>低频维度</strong>，让它们不仅仅编码位置信息，更编码了丰富的<strong>语义内容</strong>。正是为了承载这些重要的语义信息，模型倾向于在这些特定的低频维度上，系统性地生成数值巨大的异常值。</p>
+<p><strong>对量化算法的影响：</strong></p>
+<p>RoPE催生的这些结构化异常值，其重要性在不同量化算法的表现上得到了验证。实验表明，那些能够“尊重”并特意保留这些大规模数值的量化技术（例如AWQ），在需要理解上下文的任务上能够维持模型的原有性能。反之，若采用未能很好保留这些数值的方法（例如GPTQ的某些早期版本），模型的上下文推理能力则会遭受重创。</p>
+<p><strong>结论</strong>: 因此，RoPE在异常值的“诞生之旅”中扮演了一个独特的“催化剂”和“结构设计师”角色。它并非像FFN那样直接“放大”数值，而是通过其内在的频率机制，为模型在Q和K矩阵中“指定”了适合生成结构化异常值的位置，使得这些异常值的出现不再是随机的，而是有章可循、有据可依的。</p>
+<h4 id="7-5-3-“放大器”之一：FFN的门控协同效应"><a href="#7-5-3-“放大器”之一：FFN的门控协同效应" class="headerlink" title="7.5.3 “放大器”之一：FFN的门控协同效应"></a>7.5.3 “放大器”之一：FFN的门控协同效应</h4><p>如果说Softmax的需求点燃了异常值的“火花”，那么<strong>前馈网络（Feed-Forward Network, FFN）</strong>，特别是现代LLM中普遍采用的<strong>SwiGLU</strong>等门控结构，则扮演了“鼓风机”和“超级放大器”的角色。它接收来自注意力层的输出，并将其内部可能存在的微小异常趋势，急剧放大成棘手的“参天大树”。</p>
+<p><strong>核心机制：SwiGLU的“双路并进”</strong> 我们首先来看一下SwiGLU的计算公式：</p>
+<p>$$SwiGLU(x) &#x3D; (Swish(xW_1)⊙xW_2)W_3$$</p>
+<p>这里的关键在于括号内的部分：输入x被<strong>同时</strong>送入两个不同的线性层（ $W_1$ 和 $W_2$ ），形成两条并行的路径：</p>
+<ol>
+<li><strong>门控路径 (Gate Path)</strong>: $xW_1$ 的结果经过一个Swish激活函数，其输出可以看作一个“门控信号”，决定了哪些信息可以往下传递。</li>
+<li><strong>数值路径 (Value Path)</strong>:  $xW_2$ 的结果（也称作up-projection）承载了主要的数值信息。</li>
+</ol>
+<p>最后，这两条路径的结果会进行<strong>逐元素相乘（odot）</strong>。正是这个乘法操作，为异常值的“疯长”提供了绝佳的土壤。</p>
+<p><strong>异常值的“协同放大”效应</strong> 现在，想象一下当一个包含中等大小异常值的激活值x输入到FFN中时，会发生什么：</p>
+<ol>
+<li>这个异常值在通过门控路径（$xW_1$）后，可能依然是一个较大的值。</li>
+<li>同时，它在通过数值路径（$xW_2$）后，也可能是一个较大的值。</li>
+<li>当这两个较大的值在对应的维度上进行<strong>逐元素相乘</strong>时，一个“大数乘以大数”的效应就发生了！其结果是一个被<strong>平方级</strong>放大的、更加巨大的异常值。</li>
+</ol>
+<p>这就是FFN中异常值的**“协同放大”**效应。一个原本并不算极端的值，在经过FFN的双路并行再相乘的结构后，其幅度被急剧放大。</p>
+<p><strong>分布的“尖峰化”</strong> 除了放大异常值，FFN的门控机制还导致了另一个现象：<strong>零值聚集</strong>。当门控路径的输入是一个较大的负数时，Swish函数的输出会非常趋近于0。这个0在与数值路径相乘后，会强制将最终的输出也变为0，无论数值路径上的值有多大。<br>这导致FFN的输出呈现出一种非常“不健康”的分布：<strong>存在少数极其巨大的“尖峰”</strong>（由协同放大效应产生）<em>。</em> <strong>存在大量非常靠近零的“谷底”</strong>（由门控的“关闭”效应产生）。<br>这种两极分化、动态范围极大的“尖峰”分布，对于需要找到一个统一量化范围的量化算法来说，无疑是一场噩梦。</p>
+<p>上图展示了真实模型中FFN层的输出统计，可以看到，像<code>[SEP]</code>和<code>,</code>这样的Token，其输出值远超其他词语，形成了明显的尖峰<br>这张图片展示了BERT模型中，两个不同层（Layer #10 和 Layer #11）的前馈网络（FFN）输出值的统计情况。我们可以将它分为左右两部分来解读：</p>
+<p><strong>左侧图表（蓝色柱状图）：揭示异常值的“Token相关性”</strong></p>
+<ul>
+<li><strong>横坐标</strong>: 代表文本中具体的<strong>Token</strong>，例如特殊的分隔符<code>[SEP]</code>、逗号<code>,</code>、括号<code>)</code>以及常见的英文单词<code>the</code>, <code>it</code>, <code>to</code>, <code>and</code>, <code>so</code>。</li>
+<li><strong>纵坐标</strong>: 代表该Token在经过FFN层计算后，其输出向量中某个维度的<strong>数值大小</strong>。</li>
+<li><strong>核心观察</strong>: 我们可以清晰地看到，无论是第10层还是第11层，<strong><code>[SEP]</code>这个Token的输出值都呈现出“鹤立鸡群”的姿态</strong>，其数值大小（在第10层接近90000）远远超过了其他所有Token，形成了极其陡峭的尖峰。像逗号<code>,</code>这样的标点符号，其输出值也显著高于普通单词。</li>
+</ul>
+<p><strong>这个现象告诉我们</strong>：FFN产生的巨大异常值，并非随机出现在任何词语上，而是与少数<strong>特定的、功能性的Token</strong>（如分隔符和标点符号）强相关。</p>
+<p><strong>右侧图表（绿色柱状图）：揭示异常值的“通道集中性”</strong></p>
+<ul>
+<li><strong>横坐标</strong>: 代表**特征维度&#x2F;通道（Channel ID）**的编号，例如<code>#180</code>, <code>#720</code>, <code>#381</code>等。</li>
+<li><strong>纵坐标</strong>: 代表在这些特定的通道上，FFN的输出值有多大。</li>
+<li><strong>核心观察</strong>: 图中展示的这些被选出的通道，其输出值都非常高，普遍在20000到40000之间。</li>
+</ul>
+<p><strong>这个现象告诉我们</strong>：FFN输出的巨大数值，也并非随机地分布在所有4096个（或其他数量）特征维度上，而是“集中火力”出现在了**少数特定的“异常通道”**中。</p>
+<p><strong>综合结论：FFN输出的“尖峰”分布</strong><br>将这四张图结合起来，我们就得到了FFN输出的全貌：</p>
+<p>在FFN的输出激活值张量中，巨大的数值（异常值）只会在<strong>少数特定的Token（行）<strong>和</strong>少数特定的通道（列）<strong>的交叉点上出现。这就形成了一种极其“不健康”的、两极分化的</strong>“尖峰”分布</strong>：大部分数值都非常小，接近于零，但极少数位置上却存在着“核弹级”的巨大数值。</p>
+<p>正是这种巨大的动态范围和尖峰式的分布，使得为FFN的输出找到一个既能容纳“尖峰”又不“压扁”“谷底”的统一量化范围变得异常困难，从而对量化算法构成了巨大的挑战。</p>
+<p><strong>结论</strong>: FFN在异常值的“诞生之旅”中，扮演了一个至关重要的**“放大器”**角色。它接收来自上游的、可能还不太起眼的数值波动，通过其独特的门控和乘法结构，将其“催化”并“放大”成真正棘手的、具有巨大动态范围的异常值，为后续的量化过程制造了巨大的麻烦。</p>
+<h4 id="7-5-4-“放大器”之二：LayerNorm的推波助澜"><a href="#7-5-4-“放大器”之二：LayerNorm的推波助澜" class="headerlink" title="7.5.4 “放大器”之二：LayerNorm的推波助澜"></a>7.5.4 “放大器”之二：LayerNorm的推波助澜</h4><p>在异常值的“诞生之旅”中，还有一个角色出人意料，但又至关重要，它就是<strong>层归一化（Layer Normalization, LayerNorm）</strong>。</p>
+<p>从名字上看，LayerNorm的使命是“归一化”，即稳定数据分布，防止梯度消失或爆炸，它理应是异常值的“抑制者”。然而，在实际中，由于其内部一个关键的可学习参数，它有时反而会成为异常值的“放大器”。</p>
+<p><strong>核心机制：先“抑制”，后“放大”</strong></p>
+<p>我们来看一下LayerNorm的计算公式：$LayerNorm(x) &#x3D; \dfrac{x-μ}{\sqrt{σ^2+ε}}⋅γ + β$</p>
+<p>这个过程可以分为两步：</p>
+<ol>
+<li><strong>归一化步骤</strong>:  $\dfrac{x-μ}{\sqrt{σ^2+ε}}$ 这一部分是真正的“归一化”，它会将输入x调整为均值为0，方差为1的标准分布。在这一步，输入x中存在的异常值，其幅度实际上是被<strong>抑制和缩小</strong>了。</li>
+<li><strong>仿射变换步骤</strong>:  $⋅γ + β$ 这一部分，模型会用两个可学习的参数——缩放参数 γ（gamma）和偏置参数 β（beta），对归一化后的数据进行线性变换，以恢复其表达能力。<strong>问题就出在可学习的缩放参数γ上</strong>。</li>
+</ol>
+<p>$γ$ <strong>的“放大器”效应</strong> ：在模型训练的过程中，它可能会发现，某个特定的特征通道（Channel）对于最终的预测结果至关重要。为了给这个重要的通道赋予更大的“话语权”，模型会学着为这个通道分配一个<strong>非常大的γ值</strong>。<br>现在，想象一下当一个携带了由FFN层产生的巨大异常值的激活值，进入LayerNorm时会发生什么： </p>
+<ol>
+<li>归一化步骤先将这个异常值“压”了下去。 </li>
+<li>但随后，模型用它为这个异常值所在通道学到的那个巨大的γ值，重新乘了回去。 </li>
+<li>结果是，被“压”下去的异常值又被重新“抬”了起来，甚至可能被放得更大，最终导致LayerNorm的输出中，异常值依然显著存在。</li>
+</ol>
+<p><strong>图解：有无γ的天壤之别</strong> ：下面这张图通过一个对比实验，无可辩驳地证明了γ的放大器作用：</p>
+<p><img src="/images/quantization/outlier_suppression.png"></p>
+<p><img src="/images/quantization/outlier_suppression_equation.png"></p>
+<blockquote>
+<p>图片来源：论文 Outlier Suppression：Pushing the Limit of Low-bit Transformer Language Models</p>
+</blockquote>
+<ul>
+<li><strong>看图(a) <code>X̃</code></strong>: 这是<strong>标准LayerNorm</strong>的输出。我们可以清晰地看到，在第308个通道（高亮行）上，存在着一个非常尖锐的异常值。</li>
+<li><strong>看图(b) <code>γ</code></strong>: 这展示了模型学到的缩放参数γ。我们发现，<strong>恰好在第308个通道上，$γ$ 的值也异常地大</strong>。</li>
+<li><strong>看图(c) <code>X&#39;</code></strong>: 这是<strong>移除了γ缩放步骤后</strong>的输出（即Non-scaling LayerNorm）。奇迹发生了，第308通道上的异常值<strong>完全消失</strong>了，整个输出的数值分布变得非常平缓。</li>
+</ul>
+<p>这个实验有力地证明了，正是可学习的缩放参数 γ 扮演了“放大器”的角色，将上游传来的异常值“推波助澜”，使其更加显著。</p>
+<ul>
+<li><strong>关于RMSNorm的补充说明</strong> 值得一提的是，当前像Llama等主流大模型中使用的<strong>RMSNorm</strong>，虽然简化了计算（只计算方差，不计算均值），但其核心结构依然是“<strong>归一化 + 可学习的γ缩放</strong>”。因此，它也存在着与LayerNorm完全相同的、放大重要通道异常值的潜在问题。</li>
+</ul>
+<p><strong>结论</strong>: LayerNorm（及其变体RMSNorm）在异常值的诞生之旅中，扮演了一个充满矛盾的“帮凶”角色。它本意是稳定数据，但其内在的可学习缩放机制，却使其成为了异常值信号在模型中传递和放大的最后一环，为最终的量化工作带来了额外的复杂性。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/07/24/%E5%9B%BE%E7%89%87%E6%97%A5%E8%AE%B0/" rel="prev" title="图片日记">
+                  <i class="fa fa-angle-left"></i> 图片日记
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2026/09/07/%E5%90%AC%E5%90%AC%E5%89%8D%E8%BE%88%E7%9A%84%E6%83%B3%E6%B3%95/" rel="next" title="听听前辈的想法">
+                  听听前辈的想法 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Xu feng</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div>
+
+<div id="site-runtime" style="font-size: 13px; margin-top: 5px;"></div>
+<script>
+    // 计算站点运行时间
+    function showRuntime() {
+        const startDate = new Date("2026-07-21T17:18:00"); // 修改为你的实际建站日期
+        const now = new Date();
+        const diff = now - startDate;
+        
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        //const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        //const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        //const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        document.getElementById('site-runtime').innerText = 
+            `Running for ${days} days`;
+    }
+    setInterval(showRuntime, 1000*60*30); // 每秒刷新
+    showRuntime();
+</script>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/xufeng102403" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
